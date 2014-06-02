@@ -1,5 +1,6 @@
 #include "mode.h"
 #include "error.h"
+#include "helpers.h"
 #include <stdio.h>
 
 status_t window_modes_setup_init(vorbis_stream_t *stream, window_modes_setup_t **pset){
@@ -15,6 +16,7 @@ status_t window_modes_setup_init(vorbis_stream_t *stream, window_modes_setup_t *
   if(vorbis_read_nbits(MODE_COUNT_BITS, tmp, stream->io_desc, &null) == VBS_SUCCESS) {
    
     (*pset)->mode_count = (uint8_t) *tmp + 1;
+    (*pset)->mode_code_nbbits = ilog((*pset)->mode_count - 1);
 
     (*pset)->modes = malloc((*pset)->mode_count * sizeof(window_mode_t));
     if((*pset)->modes != NULL){
