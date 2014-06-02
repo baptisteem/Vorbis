@@ -4,10 +4,15 @@
 
 status_t dot_product(sample_t **fsamp, sample_t **residues, uint32_t nb_chan,
                      uint32_t n2){
-
-  for (int i = 0; i<nb_chan; i++){
-    for (int j = 0; j<n2; j++){
-      *(*(sample_t + i) + j) = (*(*(sample_t + i) + j)) * (*(*(residues + i) + j));
+  double f, r;
+  double *addr_f;
+  
+  for (uint32_t i = 0; i<nb_chan; i++){
+    for (uint32_t j = 0; j<n2; j++){
+      addr_f = *(fsamp +i) + j;
+      f = *addr_f;
+      r = *(*(residues +i) + j);
+      *addr_f= f*r;
     } 
   }
 
