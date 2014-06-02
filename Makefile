@@ -4,6 +4,7 @@ LD        = gcc
 SRCDIR    = src
 INCDIR    = include
 OBJDIR    = ref_objs
+OBJ				= objs
 
 PROG      = vorbis_decoder
 
@@ -27,19 +28,20 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
             $(OBJDIR)/residue.o                                               \
             $(OBJDIR)/helpers.o                                               \
             $(OBJDIR)/mapping.o                                               \
-            $(OBJDIR)/mode.o                                                  \
             $(OBJDIR)/codebook.o                                              \
             $(OBJDIR)/codebook_read.o                                         \
             $(OBJDIR)/time_domain_transform.o                                 \
             $(OBJDIR)/dot_product.o                                           \
             $(OBJDIR)/envelope.o
 
-MY_OBJECTS =
-
+MY_OBJECTS = $(OBJ)/mode.o 
 
 quiet-command = $(if $(VERB),$1,$(if $(2),@echo $2 && $1, @$1))
 
 all     : $(OBJDIR) $(PROG)
+
+$(MY_OBJECTS): src/mode.c $(INCDIR)
+		$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
 $(PROG) : $(OBJECTS) $(MY_OBJECTS)
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
