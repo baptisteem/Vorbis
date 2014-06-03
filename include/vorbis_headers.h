@@ -1,9 +1,10 @@
 #ifndef __VORBIS_HEADERS_H
 #define __VORBIS_HEADERS_H
 
-#include <vorbis_main.h>
+#include "vorbis_main.h"
 
-/**
+/*
+ *
  * \addtogroup common_header
  * @{
  *
@@ -27,11 +28,11 @@
  */
 status_t vorbis_common_header(vorbis_stream_t *stream, uint8_t *header_type);
 
-/**
+/* *
  * @}
  */
 
-/**
+/* *
  * \addtogroup header1
  * @{
  *
@@ -56,11 +57,11 @@ status_t vorbis_common_header(vorbis_stream_t *stream, uint8_t *header_type);
  */
 status_t vorbis_header1_decode(vorbis_stream_t *stream);
 
-/**
+/* *
  * @}
  */
 
-/**
+/* *
  * \addtogroup header2
  * @{
  *
@@ -83,11 +84,11 @@ status_t vorbis_header1_decode(vorbis_stream_t *stream);
  */
 status_t vorbis_header2_decode(vorbis_stream_t *stream);
 
-/**
+/* *
  * @}
  */
 
-/**
+/* *
  * \addtogroup header3
  * @{
  *
@@ -119,6 +120,6 @@ status_t vorbis_header3_decode(vorbis_stream_t *stream);
 
 #endif				/* __VORBIS_HEADERS_H */
 
-/**
+/* *
  * @}
  */
