@@ -14,7 +14,7 @@
  */
 typedef struct mappings_setup mappings_setup_t;
 typedef struct mapping mapping_t;
-
+typedef struct mapping_type0 mapping_type0_t;
 
 /*
  * Includes
@@ -26,6 +26,13 @@ typedef struct mapping mapping_t;
 #include <floor.h>
 #include <residue.h>
 #include <error.h>
+
+/*
+ * Define
+ */
+
+#define MAPPING_COUNT_BITS 6
+#define MAPPING_TYPE_BITS 16
 
 /*
  * Structure definitions
@@ -77,7 +84,6 @@ struct mapping {
 			    vorbis_packet_t *data);
 	void (*free) (mapping_t *map);
 };
-
 
 /* 
  * Function declarations
