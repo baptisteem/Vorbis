@@ -167,6 +167,17 @@ status_t mapping_setup_init(vorbis_stream_t *stream, mappings_setup_t **pmap){
 }
 
 static void mappings_type0_free(mapping_type0_t *map) {
+  
+  map->mapping->free(map->mapping);
+  
+  free(submap_count);
+  free(coupling_steps);
+  free(magnitude);
+  free(angle);
+  free(mux);
+  free(submap_floor);
+  free(submap_residue);
+  
   free(map);
 }
 
@@ -176,6 +187,8 @@ void mappings_free(mappings_setup_t *map) {
     map->maps[i]->free(map->maps[i]);
   }
 
+  mapping_t *mapping;
+  
   free(map->maps);
   free(map);
 }
