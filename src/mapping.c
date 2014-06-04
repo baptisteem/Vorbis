@@ -1,5 +1,5 @@
 #include "mapping.h"
-#include "error.h"
+#include "helper.h"
 
 #define FLAG_BITS 1
 #define FLAG_SQUARE_BITS 1
@@ -32,7 +32,57 @@ struct mapping_type0 {
 
 static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vorbis_packet_t *data){
 
+  mapping_type0 *map0 = (mapping_type0 *)map;
+  uint8_t submap_number = 0;
 
+  /* Floor */
+
+  for(uint32_t i=0;stream->codec->audio_channels;i++){
+  
+    submap_number = map0->mux[i];
+    
+    status_t ret = stream->codec->floors_desc[submap_number]->decode
+  
+  }
+
+  /* Non-zero propagate */
+  for(uint32_t i=0;i<map0->coupling_steps;i++){
+      uint8_t magnitude_channel = map0->magnitude[i];
+      uint8_t angle_channel = map0->angle[i];
+
+      if(data->no_residue[magnitude_channel] == 0 ||
+         data->no_residue[angle_channel] == 0){
+
+        data->no_residue[magnitude_channel] = 0;
+        data->no_residue[angle_channel] = 0;
+      }
+  }
+
+  /* Residues */
+  for(uint32_t i=0;i<map0->mapping_submap;i++){
+    uint32_t ch = 0;
+    for(uint32_t j=0;j<stream->codec->audio_channels;j++){
+      
+      if(map0->mux[j] == i){
+        
+        if(data->no_residue[j] == 1)
+          data->do_not_decode[ch] = 1;
+        else
+          data->do_not_decode[ch] = 0;
+      }
+      ch++;
+    }
+
+    stream->codec->residues_desc->residues[m->submap_residue[i]]->decode(stream, stream->codec->residues_desc->residues[m->submap_residue[i]], ch, data->size / 2, data->dec_residues, data->do_not_decode);
+
+    ch = 0;
+    for(uint32_t j=0;j<stream->codec->audio_channels;j++){
+      if(map0->mux[j] == i){
+        data->residues[j] = data->dec_residues[ch];
+        ch++;
+      }
+    }
+  }
 
 }
 
