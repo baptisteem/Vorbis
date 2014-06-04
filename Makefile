@@ -4,6 +4,7 @@ LD        = gcc
 SRCDIR    = src
 INCDIR    = include
 OBJDIR    = ref_objs
+OBJ       = objs
 
 PROG      = vorbis_decoder
 
@@ -20,9 +21,6 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
             $(OBJDIR)/vorbis_main.o                                           \
             $(OBJDIR)/vorbis_packet.o                                         \
             $(OBJDIR)/vorbis_io.o                                             \
-            $(OBJDIR)/common_header.o                                         \
-            $(OBJDIR)/header1.o      	                                      \
-            $(OBJDIR)/header2.o                                               \
             $(OBJDIR)/header3.o                                               \
             $(OBJDIR)/residue.o                                               \
             $(OBJDIR)/helpers.o                                               \
@@ -31,15 +29,18 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
             $(OBJDIR)/codebook.o                                              \
             $(OBJDIR)/codebook_read.o                                         \
             $(OBJDIR)/time_domain_transform.o                                 \
-            $(OBJDIR)/dot_product.o                                           \
-            $(OBJDIR)/envelope.o
+            $(OBJDIR)/envelope.o                                              \
+	    $(OBJDIR)/dot_product.o                                           \
 
-MY_OBJECTS =
+MY_OBJECTS = $(OBJ)/vorbis_headers.o	
 
 
 quiet-command = $(if $(VERB),$1,$(if $(2),@echo $2 && $1, @$1))
 
 all     : $(OBJDIR) $(PROG)
+
+$(MY_OBJECTS): src/vorbis_headers.c $(INCDIR)
+	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
 
 $(PROG) : $(OBJECTS) $(MY_OBJECTS)
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
