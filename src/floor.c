@@ -33,7 +33,7 @@ status_t floors_setup_init(vorbis_stream_t *stream, floors_setup_t **pset){
     floor_type1_data_new(&(*pset)->data1,stream->codec->blocksize);
 
     //Malloc for floor array
-    (*pset)->floors = malloc( (*pset)->floor_count * sizeof(floor_t));
+    (*pset)->floors = malloc( (*pset)->floor_count * sizeof(floor_t*));
     
     for(uint32_t i=0;i<(*pset)->floor_count;i++){
 
