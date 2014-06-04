@@ -201,29 +201,16 @@ status_t vorbis_header3_decode(vorbis_stream_t *stream){
 
   return_status = codebook_setup_init(stream, &stream->codec->codebooks_desc);
 
-  fprintf(stderr,"Codebook : %d\n", return_status);
-  
   return_status = time_domain_transforms_setup_init(stream, &stream->codec->tdt_desc);
 
-  fprintf(stderr,"Time domain : %d\n", return_status);
-  
   return_status = floors_setup_init(stream, &stream->codec->floors_desc);
 
-  fprintf(stderr,"Floor : %d\n", return_status);
-  
   return_status = residues_setup_init(stream, &stream->codec->residues_desc);
 
-  fprintf(stderr,"Residue : %d\n", return_status);
-  
   return_status = mappings_setup_init(stream, &stream->codec->mappings_desc);
 
-  fprintf(stderr,"Mapping : %d\n", return_status);
-  
   return_status = window_modes_setup_init(stream, &stream->codec->modes_desc);
 
-  fprintf(stderr,"Window : %d\n", return_status);
-
-  
   //Framing bit
   dst = 0;
   return_status = vorbis_read_nbits(1, &dst, stream->io_desc, &p_count); 
