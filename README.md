@@ -8,11 +8,16 @@
 * Mode : Baptiste
 * Time_Domain: Erwan
 * Helpers: Erwan
+* Floor : Baptiste
+* Common_header : JJ
+* Header 1 : JJ
+* Header 2 : JJ
+* Header 3 : Baptiste
 
-### Module curently developed ###
+
+### Module currently developed ###
 
 * Mapping : Baptiste
-* Floor : Baptiste
 * Pcm_Handler: Erwan
 * Envelope: Erwan
 * Residue: JJ
