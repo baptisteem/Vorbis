@@ -15,13 +15,15 @@ LDFLAGS   = -lm
 
 OBJECTS   = $(OBJDIR)/main.o                                                  \
             $(OBJDIR)/error.o                                                 \
-            $(OBJDIR)/pcm_handler.o                                           \
             $(OBJDIR)/ogg_core.o $(OBJDIR)/ogg_packet.o                       \
             $(OBJDIR)/floor.o $(OBJDIR)/floor0.o $(OBJDIR)/floor1.o           \
             $(OBJDIR)/vorbis_main.o                                           \
             $(OBJDIR)/vorbis_packet.o                                         \
             $(OBJDIR)/vorbis_io.o                                             \
             $(OBJDIR)/header3.o                                               \
+            $(OBJDIR)/header1.o                                               \
+	    $(OBJDIR)/header2.o                                               \
+	    $(OBJDIR)/common_header.o                                               \
             $(OBJDIR)/residue.o                                               \
             $(OBJDIR)/helpers.o                                               \
             $(OBJDIR)/mapping.o                                               \
@@ -32,14 +34,14 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
             $(OBJDIR)/envelope.o                                              \
 	    $(OBJDIR)/dot_product.o                                           \
 
-MY_OBJECTS = $(OBJ)/vorbis_headers.o	
+MY_OBJECTS = $(OBJ)/pcm_handler.o	
 
 
 quiet-command = $(if $(VERB),$1,$(if $(2),@echo $2 && $1, @$1))
 
 all     : $(OBJDIR) $(PROG)
 
-$(MY_OBJECTS): src/vorbis_headers.c $(INCDIR)
+$(MY_OBJECTS): src/pcm_handler.c $(INCDIR)
 	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
 
 $(PROG) : $(OBJECTS) $(MY_OBJECTS)
