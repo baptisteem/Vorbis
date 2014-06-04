@@ -54,6 +54,7 @@ status_t floors_setup_init(vorbis_stream_t *stream, floors_setup_t **pset){
           ((*pset)->floors[i])->type = FLOOR_TYPE1;
           floor_type1_hdr_decode(stream, (uint8_t)i, (*pset)->floors ,(*pset)->data1);
           ((*pset)->floors[i])->decode = floor_type1_decode;
+          ((*pset)->floors[i])->free = floor_type1_data_free;
         }
       }
       else
@@ -75,7 +76,7 @@ void floors_free(floors_setup_t *set){
   floor_type1_data_free(set->data1);
 
   for(uint32_t i=0;i<set->floor_count;i++){
-    free(set->floors[i]);
+    set->floors[i]->free(set->floors[i]);
   }
 
   free(set->floors);
