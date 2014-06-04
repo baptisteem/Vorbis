@@ -4,7 +4,7 @@
 envelope_t *envelope_init(uint16_t *blocksize){
 
 	//reading in the flux
-	
+	//2 malloc et classique
 	//initialization
 	
 }
@@ -15,21 +15,23 @@ void envelope_free(envelope_t *env){
 }
 
 status_t envelope_prepare(envelope_t *env, sample_t *filter){
+//comment obtient on a nouvelle taille ?
+//calcul des ij et on definit en fonction des zones,
+//on renvoie la meme enveloppe
+//
+
 
 }
+
+//cache sera toujours de la taille de la fenetre maximum
+//sample_t sera de la taille de fenetre maximum qui correpond
+//à la superposition maximum
 
 uint16_t envelope_overlap_add(envelope_t *env, sample_t *in,
                               sample_t *cache, sample_t *out){
 
-	if (!(env->initialized)){
-	//we are at the beginning
-	
-	uint32_t nc=(env->blocksize)[env->curr_window]/2;
-	//nc vaut la taille de la fenetre Courante divisée par 2
-	sample_t *out=malloc(sizeof(sample_t)*nc);
-	sample_t *cache=malloc(sizeof(sample_t)*nc);
-	for (uint32_t i=0; i<nc;i++){
-	
+
+//prendre le milieu de la 	
 	}
 
 	
