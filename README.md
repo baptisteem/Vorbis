@@ -7,9 +7,10 @@
 * Dot Product : JJ
 * Mode : Baptiste
 * Time_Domain: Erwan
+* Helpers: Erwan
 
 ### Module curently developed ###
 
 * Mapping : Baptiste
 * Floor : Baptiste
-* Helpers: Erwan
+*Pcm_Handler: Erwan
