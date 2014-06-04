@@ -14,4 +14,5 @@
 * Mapping : Baptiste
 * Floor : Baptiste
 * Pcm_Handler: Erwan
+* Envelope: Erwan
 * Residue: JJ
