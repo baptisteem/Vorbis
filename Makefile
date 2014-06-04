@@ -20,26 +20,28 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
             $(OBJDIR)/floor.o $(OBJDIR)/floor0.o $(OBJDIR)/floor1.o           \
             $(OBJDIR)/vorbis_main.o                                           \
             $(OBJDIR)/vorbis_packet.o                                         \
-            $(OBJDIR)/vorbis_io.o                                             \
-            $(OBJDIR)/header3.o                                               \
+            $(OBJDIR)/vorbis_io.o 					      \
+            $(OBJDIR)/header1.o                                               \
+            $(OBJDIR)/header2.o                                               \
+            $(OBJDIR)/common_header.o                                               \
+    	    $(OBJDIR)/header3.o                                               \
             $(OBJDIR)/residue.o                                               \
             $(OBJDIR)/helpers.o                                               \
             $(OBJDIR)/mapping.o                                               \
             $(OBJDIR)/mode.o                                                  \
             $(OBJDIR)/codebook.o                                              \
             $(OBJDIR)/codebook_read.o                                         \
-            $(OBJDIR)/time_domain_transform.o                                 \
             $(OBJDIR)/envelope.o                                              \
-	    $(OBJDIR)/dot_product.o                                           \
+	    $(OBJDIR)/dot_product.o                                           
 
-MY_OBJECTS = $(OBJ)/vorbis_headers.o	
+MY_OBJECTS = $(OBJ)/time_domain.o	
 
 
 quiet-command = $(if $(VERB),$1,$(if $(2),@echo $2 && $1, @$1))
 
 all     : $(OBJDIR) $(PROG)
 
-$(MY_OBJECTS): src/vorbis_headers.c $(INCDIR)
+$(MY_OBJECTS): src/time_domain.c $(INCDIR)
 	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
 
 $(PROG) : $(OBJECTS) $(MY_OBJECTS)
