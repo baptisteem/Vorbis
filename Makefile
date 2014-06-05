@@ -12,6 +12,7 @@ CPPFLAGS  =
 CFLAGS    = -std=c99 -g -I $(INCDIR)
 LDFLAGS   = -lm
 
+SUBPROG   = vorbis_decoder_mode vorbis_decoder_dot_product
 
 OBJECTS   = $(OBJDIR)/main.o                                                  \
             $(OBJDIR)/error.o                                                 \
@@ -32,7 +33,8 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
             $(OBJDIR)/codebook_read.o                                         \
             $(OBJDIR)/time_domain_transform.o                                 \
             $(OBJDIR)/envelope.o                                              \
-	    $(OBJDIR)/dot_product.o                                           \
+	    			$(OBJDIR)/dot_product.o                                           \
+	    			$(OBJDIR)/mode.o       
 
 MY_OBJECTS = 
 
@@ -48,6 +50,13 @@ $(PROG)_dot_product : $(filter-out $(OBJDIR)/dot_product.o,$(OBJECTS)) $(OBJ)/do
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - dot_product ##
 
+## Start - mode ##
+mode : $(PROG)_mode $(OBJDIR)
+
+$(PROG)_mode : $(filter-out $(OBJDIR)/mode.o,$(OBJECTS)) $(OBJ)/mode.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - mode ##
+
 $(OBJ)/%.o: $(SRCDIR)/%.c $(INCDIR)
 	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
 
@@ -57,6 +66,5 @@ $(PROG) : $(OBJECTS) $(MY_OBJECTS)
 $(OBJDIR):
 	$(call quiet-command, mkdir -p $(OBJDIR),)
 
-
 clean    :
-	$(call quiet-command, rm -f $(MY_OBJECTS) $(PROG) *~, "  CLEAN    ")1
+	$(call quiet-command, rm -f $(MY_OBJECTS) $(PROG) $(SUBPROG) *~, "  CLEAN    ")1
