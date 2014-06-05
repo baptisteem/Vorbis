@@ -4,7 +4,7 @@ LD        = gcc
 SRCDIR    = src
 INCDIR    = include
 OBJDIR    = ref_objs
-OBJ       = objs
+OBJ				= objs
 
 PROG      = vorbis_decoder
 
@@ -28,7 +28,6 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
             $(OBJDIR)/residue.o                                               \
             $(OBJDIR)/helpers.o                                               \
             $(OBJDIR)/mapping.o                                               \
-            $(OBJDIR)/mode.o                                                  \
             $(OBJDIR)/codebook.o                                              \
             $(OBJDIR)/codebook_read.o                                         \
             $(OBJDIR)/time_domain_transform.o                                 \

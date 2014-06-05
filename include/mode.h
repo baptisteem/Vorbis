@@ -10,6 +10,16 @@
  */
 
 /*
+ * Defines
+ */
+
+#define MODE_COUNT_BITS 6
+#define MODE_FLAG_BITS 1
+#define MODE_WINDOW_BITS 16
+#define MODE_TRANSFORM_BITS 16
+#define MODE_MAPPING_BITS 8
+
+/*
  * Type definitions
  */
 typedef struct window_modes_setup window_modes_setup_t;
