@@ -12,8 +12,6 @@ CPPFLAGS  =
 CFLAGS    = -std=c99 -g -I $(INCDIR)
 LDFLAGS   = -lm
 
-SUBPROG   = vorbis_decoder_mode vorbis_decoder_dot_product
-
 OBJECTS   = $(OBJDIR)/main.o                                                  \
             $(OBJDIR)/error.o                                                 \
             $(OBJDIR)/pcm_handler.o                                           \
@@ -36,12 +34,20 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
 	    			$(OBJDIR)/dot_product.o                                           \
 	    			$(OBJDIR)/mode.o       
 
-MY_OBJECTS = 
-
+MY_OBJECTS = $(OBJ)/mode.o \
+						 $(OBJ)/dot_product.o
+						
 
 quiet-command = $(if $(VERB),$1,$(if $(2),@echo $2 && $1, @$1))
 
 all     : $(OBJDIR) $(PROG)
+
+## Reference - Seulement les libs de départ ##
+ref : $(PROG)_ref $(OBJDIR)
+
+$(PROG)_ref : $(OBJECTS)
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - reference ##
 
 ## Start - dot_product ##
 dot_product : $(PROG)_dot_product $(OBJDIR)
@@ -50,6 +56,7 @@ $(PROG)_dot_product : $(filter-out $(OBJDIR)/dot_product.o,$(OBJECTS)) $(OBJ)/do
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - dot_product ##
 
+
 ## Start - mode ##
 mode : $(PROG)_mode $(OBJDIR)
 
@@ -57,14 +64,22 @@ $(PROG)_mode : $(filter-out $(OBJDIR)/mode.o,$(OBJECTS)) $(OBJ)/mode.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - mode ##
 
+## Start - main ##
+main : $(PROG)_main $(OBJDIR)
+
+$(PROG)_main : $(filter-out $(OBJDIR)/main.o,$(OBJECTS)) $(OBJ)/main.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - mode ##
+
+
 $(OBJ)/%.o: $(SRCDIR)/%.c $(INCDIR)
 	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
 
-$(PROG) : $(OBJECTS) $(MY_OBJECTS)
+$(PROG) : $(filter-out $(OBJ),$(OBJECT)) $(MY_OBJECTS)
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 
 $(OBJDIR):
 	$(call quiet-command, mkdir -p $(OBJDIR),)
 
 clean    :
-	$(call quiet-command, rm -f $(MY_OBJECTS) $(PROG) $(SUBPROG) *~, "  CLEAN    ")1
+	$(call quiet-command, rm -f $(MY_OBJECTS) $(PROG)* $(SUBPROG) *~, "  CLEAN    ")1
