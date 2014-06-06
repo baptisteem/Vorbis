@@ -14,10 +14,11 @@
 * Header 2 : JJ
 * Header 3 : Baptiste
 * Main : Baptiste
+* Envelope : Erwan
 
 ### Module currently developed ###
 
 * Mapping : Baptiste
-* Pcm_Handler: Erwan
-* Envelope: Erwan
+* Pcm_Handler: Baptiste
+* Floor1: Erwan
 * Residue: JJ
