@@ -1,8 +1,11 @@
-#include <unistd.h>
+#include <getopt.h>
+#include <libgen.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #include "ogg_core.h"
+#include "pcm_handler.h"
 
 void display_list_stream(ogg_physical_stream_t *ogg_stream);
 void display_help();
@@ -13,6 +16,9 @@ int main(int argc, char *argv[]) {
   uint32_t c;
   char format[] = "hls:f:o:";
   uint8_t list_stream = 0;
+  long id = -1;
+  char *outformat = "wav";
+  char outfile[255] = "\0";
 
   while( (c = getopt(argc,argv,format)) != -1){
     switch(c){
@@ -23,31 +29,52 @@ int main(int argc, char *argv[]) {
         list_stream = 1;
         break;
       case 's':
+        id = (long) optarg;
         break;
       case 'f':
+        outformat = optarg;
         break;
       case 'o':
+        strcpy(outfile,optarg);
+        //outfile = optarg;
+        break;
+      case ':':       /* -f or -o without operand */
+        printf("%s: option require an argument -- '%c'\n", argv[0], optopt);
         break;
       case '?':
-        printf("%s: invalid option -- '%c'\n", argv[0], c);
+        return 0;
         break;
     }
   }
 
-  file = fopen(argv[1], "r");
+  //If we don't have a filename
+  if(strcmp(outfile,"")==0){
+    strcpy(outfile,basename(argv[optind]));
+    strcat(outfile,".");
+    strcat(outfile,outformat);
+  }
+
+  file = fopen(argv[optind], "r");
   if(file != NULL){
-  
+    
     ogg_physical_stream_t *physical_stream = NULL;
     
     if(ogg_init(file,&physical_stream) == OGG_OK){
       
+      //If we want to list all logical streams
       if(list_stream==1)
         display_list_stream(physical_stream);
-    
+
+      pcm_handler_t *pcm_handler = pcm_handler_create(outformat,outfile);
+      
+      ogg_decode(physical_stream->first, pcm_handler);
+      
+      pcm_handler_delete(pcm_handler);
+      ogg_term(physical_stream);
     }
     else
-      printf("Aucun flux physique disponible.");
-
+      printf("Aucun flux physique disponible.\n");
+    
   }
   else
     printf("Failed to open input file '%s': No such file or directory\n", argv[1]);
@@ -55,6 +82,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
+/* Display list of all logical stream in a physical stream */
 void display_list_stream(ogg_physical_stream_t *ogg_stream){
 
   uint8_t cpt = 0;
@@ -64,14 +92,13 @@ void display_list_stream(ogg_physical_stream_t *ogg_stream){
   while(tmp != NULL)
   {
     if(tmp->codec == OGG_VORBIS)
-      printf("%d: codec='vorbis', id=%d", cpt, tmp->stream_id);
+      printf("\t%d: codec='vorbis', id=%d\n", cpt, tmp->stream_id);
     else
-      printf("%d: codec='unknown', id=%d", cpt, tmp->stream_id);
+      printf("\t%d: codec='unknown', id=%d\n", cpt, tmp->stream_id);
 
     tmp = tmp->next;
     cpt++;
   }
-
 }
 
 void display_help(){
@@ -88,7 +115,6 @@ void display_help(){
       "\t -s <id> : decode the stream of the given id\n"
       "\t -o <outfile> : set the output file name to <outfile>\n"
       "\t -f <format> : set the ouput format to <format>.\n"
-      "\t\t\t available formats are:\n"
-      " \t\t\t\t\t\twav\n"
-      " \t\t\t\t\t\traw\n");
+      "\t\t\t available formats are:\n");
+      pcm_handler_list("");
 }
