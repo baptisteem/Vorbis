@@ -36,7 +36,6 @@ int main(int argc, char *argv[]) {
         break;
       case 'o':
         strcpy(outfile,optarg);
-        //outfile = optarg;
         break;
       case ':':       /* -f or -o without operand */
         printf("%s: option require an argument -- '%c'\n", argv[0], optopt);
@@ -56,25 +55,25 @@ int main(int argc, char *argv[]) {
 
   file = fopen(argv[optind], "r");
   if(file != NULL){
-    
+
     ogg_physical_stream_t *physical_stream = NULL;
-    
+
     if(ogg_init(file,&physical_stream) == OGG_OK){
-      
+
       //If we want to list all logical streams
       if(list_stream==1)
         display_list_stream(physical_stream);
 
       pcm_handler_t *pcm_handler = pcm_handler_create(outformat,outfile);
-      
+
       ogg_decode(physical_stream->first, pcm_handler);
-      
+
       pcm_handler_delete(pcm_handler);
       ogg_term(physical_stream);
     }
     else
       printf("Aucun flux physique disponible.\n");
-    
+
   }
   else
     printf("Failed to open input file '%s': No such file or directory\n", argv[1]);
@@ -116,5 +115,5 @@ void display_help(){
       "\t -o <outfile> : set the output file name to <outfile>\n"
       "\t -f <format> : set the ouput format to <format>.\n"
       "\t\t\t available formats are:\n");
-      pcm_handler_list("");
+  pcm_handler_list("");
 }
