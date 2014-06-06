@@ -9,7 +9,7 @@ OBJ       = objs
 PROG      = vorbis_decoder
 
 CPPFLAGS  = 
-CFLAGS    = -std=c99 -g -I $(INCDIR)
+CFLAGS    = -std=c99 -g -Wall -Wextra -I $(INCDIR)
 LDFLAGS   = -lm
 
 
