@@ -7,29 +7,40 @@
 
 status_t decode_stream(ogg_logical_stream_t *ogg_stream, pcm_handler_t *pcm_hdler){
 
-    vorbis_stream_t *vorbis = vorbis_new(ogg_stream,pcm_hdler);
+  vorbis_stream_t *vorbis = vorbis_new(ogg_stream,pcm_hdler);
+
+  vorbis_header1_decode(vorbis);
+  vorbis_io_next_packet(vorbis->io_desc);
+  vorbis_header2_decode(vorbis);
+  vorbis_io_next_packet(vorbis->io_desc);
+
+  vorbis_header3_decode(vorbis);
+
+  vorbis_packet_t *packet = vorbis_packet_init(vorbis->codec->blocksize,vorbis->codec->audio_channels);
+
+  pcm_hdler->init(pcm_hdler,vorbis->codec->audio_sample_rate,vorbis->codec->audio_channels);
+
+  int64_t cpt = 0;
+  while(vorbis_io_next_packet(vorbis->io_desc) == VBS_SUCCESS){
     
-    vorbis_header1_decode(vorbis);
-    vorbis_io_next_packet(vorbis->io_desc);
-    vorbis_header2_decode(vorbis);
-    vorbis_io_next_packet(vorbis->io_desc);
+    uint16_t nb_samp = 0;
+    vorbis_packet_decode(vorbis,packet,&nb_samp);
+    
+    //We check if we reached the limit    
+    if(vorbis_io_limit(vorbis->io_desc) != -1 && vorbis_io_limit(vorbis->io_desc) < cpt+nb_samp)
+      break;
+    
+    cpt += nb_samp;
+    pcm_hdler->process(pcm_hdler,nb_samp,packet->pcm);
+  }
 
-    vorbis_header3_decode(vorbis);
 
-      vorbis_packet_t *packet = vorbis_packet_init(vorbis->codec->blocksize,vorbis->codec->audio_channels);
+  pcm_hdler->process(pcm_hdler,vorbis_io_limit(vorbis->io_desc)-cpt,packet->pcm);
+  pcm_hdler->finalize(pcm_hdler);
+  vorbis_packet_free(packet);
+  vorbis_free(vorbis);
 
-      pcm_hdler->init(pcm_hdler,vorbis->codec->audio_sample_rate,vorbis->codec->audio_channels);
-      while(vorbis_io_next_packet(vorbis->io_desc) == VBS_SUCCESS){
-      
-      uint16_t nb_samp = 0;
-      vorbis_packet_decode(vorbis,packet,&nb_samp);
-
-      pcm_hdler->process(pcm_hdler,nb_samp,packet->pcm);
-    }
-
-    pcm_hdler->finalize(pcm_hdler);
-    vorbis_packet_free(packet);
-    vorbis_free(vorbis);
+  return VBS_SUCCESS;
 }
 
 vorbis_stream_t *vorbis_new(ogg_logical_stream_t *ogg, pcm_handler_t *pcm_hdler){
@@ -63,7 +74,6 @@ void vorbis_free(vorbis_stream_t *vorbis){
 
   vorbis_codec_free(vorbis->codec);
   vorbis_io_free(vorbis->io_desc);
-  pcm_handler_delete(vorbis->pcm_hdler);
 
   free(vorbis);
 }
