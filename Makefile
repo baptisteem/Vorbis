@@ -46,7 +46,7 @@ ref : $(PROG)_ref $(OBJDIR)
 
 $(PROG)_ref : $(OBJECTS)
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
-	## End - reference ##
+## End - reference ##
 
 
 ## Start - dot_product ##
@@ -54,14 +54,21 @@ dot_product : $(PROG)_dot_product $(OBJDIR)
 
 $(PROG)_dot_product : $(filter-out $(OBJDIR)/dot_product.o,$(OBJECTS)) $(OBJ)/dot_product.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
-	## End - dot_product ##
+## End - dot_product ##
 
 ## Start - mode ##
 mode : $(PROG)_mode $(OBJDIR)
 
 $(PROG)_mode : $(filter-out $(OBJDIR)/mode.o,$(OBJECTS)) $(OBJ)/mode.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
-	## End - mode ##
+## End - mode ##
+
+## Start - mapping ##
+mapping : $(PROG)_mapping $(OBJDIR)
+
+$(PROG)_mapping : $(filter-out $(OBJDIR)/mapping.o,$(OBJECTS)) $(OBJ)/mapping.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - mapping ##
 
 $(OBJ)/%.o: $(SRCDIR)/%.c $(INCDIR)
 	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
