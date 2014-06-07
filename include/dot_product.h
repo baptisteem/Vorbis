@@ -1,7 +1,7 @@
 #ifndef __DOT_PRODUCT_H
 #define __DOT_PRODUCT_H
 
-/**
+/* *
  * \addtogroup dot_product
  * @{
  * 
@@ -12,9 +12,9 @@
 /*
  * Includes
  */
-#include <sample.h>
-#include <error.h>
-#include <stdint.h>
+#include "sample.h"
+#include "error.h"
+#include "stdint.h"
 
 /*
  * Structure definitions
