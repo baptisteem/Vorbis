@@ -12,8 +12,6 @@ CPPFLAGS  =
 CFLAGS    = -std=c99 -g -I $(INCDIR)
 LDFLAGS   = -lm
 
-SUBPROG   = vorbis_decoder_mode vorbis_decoder_dot_product
-
 OBJECTS   = $(OBJDIR)/main.o                                                  \
             $(OBJDIR)/error.o                                                 \
             $(OBJDIR)/pcm_handler.o                                           \
@@ -57,6 +55,13 @@ $(PROG)_mode : $(filter-out $(OBJDIR)/mode.o,$(OBJECTS)) $(OBJ)/mode.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - mode ##
 
+## Start - vorbis_main ##
+vorbis_main : $(PROG)_vorbis_main $(OBJDIR)
+
+$(PROG)_vorbis_main : $(filter-out $(OBJDIR)/vorbis_main.o,$(OBJECTS)) $(OBJ)/vorbis_main.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - vorbis_main ##
+
 $(OBJ)/%.o: $(SRCDIR)/%.c $(INCDIR)
 	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
 
@@ -67,4 +72,4 @@ $(OBJDIR):
 	$(call quiet-command, mkdir -p $(OBJDIR),)
 
 clean    :
-	$(call quiet-command, rm -f $(MY_OBJECTS) $(PROG) $(SUBPROG) *~, "  CLEAN    ")1
+	$(call quiet-command, rm -f $(MY_OBJECTS) $(PROG)* *~, "  CLEAN    ")1
