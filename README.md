@@ -20,5 +20,6 @@
 
 * Mapping : Baptiste
 * Pcm_Handler: Baptiste
-* Floor1: Erwan
+* Floor1: Erwan --En pause en attente d'info
+* Codebook: Erwan
 * Residue: JJ
