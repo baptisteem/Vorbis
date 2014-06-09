@@ -56,6 +56,8 @@ MY_OBJECTS = $(OBJDIR)/main.o	\
 						$(OBJ)/dot_product.o                                           \
 						$(OBJ)/mode.o       
 
+MY_OBJECTS = $(OBJ)/time_domain.o	
+
 
 quiet-command = $(if $(VERB),$1,$(if $(2),@echo $2 && $1, @$1))
 
