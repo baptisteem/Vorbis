@@ -3,45 +3,33 @@
 #include <math.h>
 #include "sample.h"
 
-//Realisation d'une extension qui finalement est inutile
-//Faut il l'enlever ?
 
-struct envelope1 {
-	envelope_t base;
-	uint8_t ancient_next_window;
-	uint8_t ancient_curr_window;
-};
-
-typedef struct envelope1 envelope1_t;
 
 envelope_t *envelope_init(uint16_t *blocksize){
 
 	printf("\n \n \nstarting envelope_init \n");
 	//initialization
-	envelope1_t *env=malloc(sizeof(envelope1_t));
+	envelope_t *env=malloc(sizeof(envelope_t));
 	uint16_t *block=malloc(2*sizeof(uint16_t));
 	for (uint32_t i=0; i<2; i++){
 		block[i]=blocksize[i];
 	}
 	
-	env->base.initialized=0;
-	env->base.blocksize=block;
-	env->base.prev_window=0;
-	env->base.curr_window=0;
-	env->base.next_window=0;
-	env->ancient_next_window=0;
-	env->ancient_curr_window=0;
+	env->initialized=0;
+	env->blocksize=block;
+	env->prev_window=0;
+	env->curr_window=0;
+	env->next_window=0;
 	printf("fin de envelope init \n");
-	return (envelope_t *)(env);
+	return (env);
 	
 }
 
 void envelope_free(envelope_t *env){
 
 	printf(" starting envelope_free \n");
-	envelope1_t *env1=(envelope1_t *)env;
-	free(env1->base.blocksize);
-	free(env1);
+	free(env->blocksize);
+	free(env);
 	printf(" envelope_free_done \n");
 }
 
@@ -50,29 +38,16 @@ void envelope_free(envelope_t *env){
 status_t envelope_prepare(envelope_t *env, sample_t *filter){
 
 
-	envelope1_t *env1=(envelope1_t *) env;
-
-
-	if (env1->base.next_window != 0){
-		env1->base.next_window=1;
+	if (env->next_window != 0){
+		env->next_window=1;
 	}
-	/*
-	if (env1->base.initialized == 1){
-		env1->base.prev_window=env1->ancient_curr_window;
-		env1->base.curr_window=env1->ancient_next_window;
-
-	}
-	env1->ancient_next_window=env1->base.next_window;
-	env1->ancient_curr_window=env1->base.curr_window;*/
-
-	//	printf("prepare: prec %d, cour%d, next%d,ancient_next%d les tailles %d %d initialized %d \n",env1->base.prev_window,env1->base.curr_window,env1->base.next_window,env1->ancient_next_window, env1->base.blocksize[0],env1->base.blocksize[1],env1->base.initialized);
-
+	
 	//calculating the i0,i1,i2,i3
 	uint32_t i0,i1,i2,i3,left_n,right_n;
-	uint32_t nc=(env1->base.blocksize)[env1->base.curr_window];
-	uint32_t b0=(env1->base.blocksize)[0];
+	uint32_t nc=(env->blocksize)[env->curr_window];
+	uint32_t b0=(env->blocksize)[0];
 
-	if (env1->base.prev_window != env1->base.curr_window){
+	if (env->prev_window != env->curr_window){
 
 		i0=(nc-b0)/4;
 		i1=(nc+b0)/4;
@@ -84,7 +59,7 @@ status_t envelope_prepare(envelope_t *env, sample_t *filter){
 		left_n=nc/2;	
 	}
 
-	if (env1->base.curr_window != env1->base.next_window){
+	if (env->curr_window != env->next_window){
 
 		i2=(3*nc-b0)/4;
 		i3=(3*nc+b0)/4;
@@ -138,11 +113,10 @@ status_t envelope_prepare(envelope_t *env, sample_t *filter){
 uint16_t envelope_overlap_add(envelope_t *env, sample_t *in,
                               sample_t *cache, sample_t *out){
 
-	envelope1_t * env1=(envelope1_t *)env;
-	uint32_t nc=(env1->base.blocksize)[env1->base.curr_window];
-	uint32_t np=(env1->base.blocksize)[env1->base.prev_window];
+	uint32_t nc=(env->blocksize)[env->curr_window];
+	uint32_t np=(env->blocksize)[env->prev_window];
 
-	if (env1->base.initialized ==0){
+	if (env->initialized ==0){
 
 		for (uint32_t i=0; i<nc/2; i++){
 			cache[i]=in[i+nc/2];
