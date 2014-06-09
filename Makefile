@@ -47,7 +47,7 @@ MY_OBJECTS = $(OBJDIR)/main.o	\
 						$(OBJDIR)/vorbis_io.o                                             \
 						$(OBJDIR)/header3.o                                               \
 						$(OBJDIR)/residue.o                                               \
-						$(OBJDIR)/helpers.o                                               \
+						$(OBJ)/helpers.o                                               \
 						$(OBJDIR)/mapping.o                                               \
 						$(OBJDIR)/codebook.o                                              \
 						$(OBJDIR)/codebook_read.o                                         \
@@ -75,6 +75,15 @@ $(PROG)_dot_product : $(filter-out $(OBJDIR)/dot_product.o,$(OBJECTS)) $(OBJ)/do
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - dot_product ##
 
+
+## Start - helpers ##
+helpers : $(PROG)_helpers $(OBJDIR)
+
+$(PROG)_helpers : $(filter-out $(OBJDIR)/helpers.o,$(OBJECTS)) $(OBJ)/helpers.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - helpers ##
+
+
 ## Start - mode ##
 mode : $(PROG)_mode $(OBJDIR)
 
@@ -82,12 +91,14 @@ $(PROG)_mode : $(filter-out $(OBJDIR)/mode.o,$(OBJECTS)) $(OBJ)/mode.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - mode ##
 
+
 ## Start - time_domain_transform ##
 time_domain : $(PROG)_time_domain $(OBJDIR)
 
 $(PROG)_time_domain : $(filter-out $(OBJDIR)/time_domain_transform.o,$(OBJECTS)) $(OBJ)/time_domain_transform.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - time_domain_transform ##
+
 
 #Rule for time_domain, because not the same name
 $(OBJ)/time_domain_transform.o: $(SRCDIR)/time_domain.c $(INCDIR)
