@@ -61,7 +61,7 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
 
     floor_t *floor = stream->codec->floors_desc->floors[floor_nb];
   
-    ret = floor->decode(stream, floor, *data->spectral, stream->codec->blocksize[1]/2);
+    ret = floor->decode(stream, floor, data->spectral[i], stream->codec->blocksize[1]/2);
   }
   if(ret != VBS_SUCCESS)
     return ret;
@@ -98,7 +98,7 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
     uint8_t residue_nb = map0->submap_residue[i];
     residue_t *residue = stream->codec->residues_desc->residues[residue_nb];
 
-    ret = residue->decode(stream, residue, ch, stream->codec->blocksize[1]/2, data->dec_residues, data->do_not_decode);
+    ret = residue->decode(stream, residue, ch, data->size/2, data->dec_residues, data->do_not_decode);
 
     if(ret != VBS_SUCCESS)
       return ret;
