@@ -56,9 +56,6 @@ MY_OBJECTS = $(OBJDIR)/main.o	\
 						$(OBJ)/dot_product.o                                           \
 						$(OBJ)/mode.o       
 
-MY_OBJECTS = $(OBJ)/time_domain.o	
-
-
 quiet-command = $(if $(VERB),$1,$(if $(2),@echo $2 && $1, @$1))
 
 all     : $(OBJDIR) $(PROG)
@@ -84,6 +81,17 @@ mode : $(PROG)_mode $(OBJDIR)
 $(PROG)_mode : $(filter-out $(OBJDIR)/mode.o,$(OBJECTS)) $(OBJ)/mode.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - mode ##
+
+## Start - time_domain_transform ##
+time_domain : $(PROG)_time_domain $(OBJDIR)
+
+$(PROG)_time_domain : $(filter-out $(OBJDIR)/time_domain_transform.o,$(OBJECTS)) $(OBJ)/time_domain_transform.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - time_domain_transform ##
+
+#Rule for time_domain, because not the same name
+$(OBJ)/time_domain_transform.o: $(SRCDIR)/time_domain.c $(INCDIR)
+	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
 
 $(OBJ)/%.o: $(SRCDIR)/%.c $(INCDIR)
 	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
