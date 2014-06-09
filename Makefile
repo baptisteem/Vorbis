@@ -9,7 +9,7 @@ OBJ				= objs
 PROG      = vorbis_decoder
 
 CPPFLAGS  = 
-CFLAGS    = -std=c99 -g -I $(INCDIR)
+CFLAGS    = -std=c99 -g -Wall -Wextra -I $(INCDIR)
 LDFLAGS   = -lm
 
 OBJECTS   = $(OBJDIR)/main.o                                                  \
@@ -74,6 +74,14 @@ dot_product : $(PROG)_dot_product $(OBJDIR)
 $(PROG)_dot_product : $(filter-out $(OBJDIR)/dot_product.o,$(OBJECTS)) $(OBJ)/dot_product.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - dot_product ##
+
+
+## Start - envelope ##
+envelope : $(PROG)_envelope $(OBJDIR)
+
+$(PROG)_envelope : $(filter-out $(OBJDIR)/envelope.o,$(OBJECTS)) $(OBJ)/envelope.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - envelope ##
 
 
 ## Start - floor ##
