@@ -46,13 +46,13 @@ status_t floors_setup_init(vorbis_stream_t *stream, floors_setup_t **pset){
 
     //If it's a type 0 floor
     if(tmp == FLOOR_TYPE0){
-      floor_type0_hdr_decode(stream, (uint8_t)i, (*pset)->floors ,(*pset)->data0);
+      floor_type0_hdr_decode(stream, (uint8_t)i, &(*pset)->floors[i] ,(*pset)->data0);
       ((*pset)->floors[i])->id = (uint8_t)i;
       ((*pset)->floors[i])->type = FLOOR_TYPE0;
       ((*pset)->floors[i])->decode = floor_type0_decode;
     }
     else if(tmp == FLOOR_TYPE1){
-      floor_type1_hdr_decode(stream, (uint8_t)i, (*pset)->floors ,(*pset)->data1);
+      floor_type1_hdr_decode(stream, (uint8_t)i, &(*pset)->floors[i] ,(*pset)->data1);
       ((*pset)->floors[i])->id = (uint8_t)i;
       ((*pset)->floors[i])->type = FLOOR_TYPE1;
       ((*pset)->floors[i])->decode = (void *)floor_type1_decode;
@@ -60,7 +60,6 @@ status_t floors_setup_init(vorbis_stream_t *stream, floors_setup_t **pset){
   }  
   floor_type1_data_allocate((*pset)->data1);
   floor_type0_data_allocate((*pset)->data0);
-
 
   return VBS_SUCCESS;
 }
