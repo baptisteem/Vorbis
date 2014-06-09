@@ -38,7 +38,7 @@ MY_OBJECTS = $(OBJDIR)/main.o	\
 						$(OBJDIR)/error.o                                                 \
 						$(OBJDIR)/pcm_handler.o                                           \
 						$(OBJDIR)/ogg_core.o $(OBJDIR)/ogg_packet.o                       \
-						$(OBJDIR)/floor.o $(OBJDIR)/floor0.o $(OBJDIR)/floor1.o           \
+						$(OBJ)/floor.o $(OBJDIR)/floor0.o $(OBJDIR)/floor1.o           \
 						$(OBJDIR)/vorbis_main.o                                           \
 						$(OBJDIR)/header1.o                                           \
 						$(OBJDIR)/header2.o                                           \
@@ -74,6 +74,14 @@ dot_product : $(PROG)_dot_product $(OBJDIR)
 $(PROG)_dot_product : $(filter-out $(OBJDIR)/dot_product.o,$(OBJECTS)) $(OBJ)/dot_product.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - dot_product ##
+
+
+## Start - floor ##
+floor : $(PROG)_floor $(OBJDIR)
+
+$(PROG)_floor : $(filter-out $(OBJDIR)/floor.o,$(OBJECTS)) $(OBJ)/floor.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - floor ##
 
 
 ## Start - helpers ##
