@@ -19,7 +19,7 @@
 ### Module currently developed ###
 
 * Mapping : Baptiste
-* Pcm_Handler: Baptiste
-* Floor1: Erwan --En pause en attente d'info
-* Codebook: Erwan
+* Pcm_Handler: Erwan
+* Floor1: Erwan 
+* Codebook: Erwan et JJ à partir de Mardi après midi
 * Residue: JJ
