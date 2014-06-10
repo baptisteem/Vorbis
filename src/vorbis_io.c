@@ -2,11 +2,13 @@
 #include "ogg.h"
 #include "ogg_packet.h"
 #include "helpers.h"
+#include <stdio.h>
 
 struct vorbis_io{
 
   ogg_logical_stream_t *stream;
-  int8_t reste;
+  uint8_t reste;
+  uint8_t nb_reste;
 
 };
 
@@ -14,25 +16,20 @@ struct vorbis_io{
 */
 status_t vorbis_read_nbits(uint32_t nb_bits, uint32_t *dst, vorbis_io_t *io, uint32_t *p_count){
 
-  uint8_t bits_reste = ilog(io->reste);
-
   //if we have enough bits in reste
-  if(bits_reste >= nb_bits){
-
-    //Create the mask to select bits in reste
-    uint8_t mask = 0;
-    for(uint8_t i=bits_reste;i>bits_reste-nb_bits;i--){
-      mask += pow(2,i);
-    }
+  if(io->nb_reste >= nb_bits){
 
     *dst = 0;
-    *dst = io->reste & mask;
+    *dst = io->reste << nb_bits;
+    io->reste = io->reste >> nb_bits;
+    io->nb_reste -= nb_bits;
+
     *p_count = nb_bits;
   }
   else{
 
-    uint32_t nb_bytes = (io->reste + nb_bits) / 8;
-    uint8_t reste_in_bits = (io->reste + nb_bits) % 8;
+    uint32_t nb_bytes = (io->nb_reste + nb_bits) / 8 + 1;
+    uint8_t reste_in_bits = nb_bytes*8 - io->nb_reste - nb_bits;
     uint8_t *buf = malloc(nb_bytes * sizeof(uint8_t));
     uint32_t bytes_read = 0;
 
@@ -43,16 +40,37 @@ status_t vorbis_read_nbits(uint32_t nb_bits, uint32_t *dst, vorbis_io_t *io, uin
     *dst = 0;
     //We have the same amount of byte read
     if(nb_bytes == bytes_read){
-
+      
       //Fill dst with bytes read
-      *dst = io->reste << (32-bits_reste);
-      for(uint8_t i=1;i<=nb_bytes;i++){
-        *dst |= buf[i-1] << (32-bits_reste-i*8);
+      *dst = io->reste << (nb_bytes*8 + reste_in_bits);
+      for(uint8_t i=0;i<nb_bytes;i++){
+        fprintf(stderr,"Dst : %d\n", (nb_bytes-i-1)*8+io->nb_reste);
+        *dst |= buf[i] << ((nb_bytes-i-1)*8 + io->nb_reste);
       }
 
+      uint8_t mask = 0;
+      for(uint8_t i=0;i<reste_in_bits;i++){
+          mask += pow(2,i);
+      }
       io->reste = 0;
-      io->reste = buf[nb_bytes-1] << (8-reste_in_bits);
+      fprintf(stderr,"buf[nb_bytes-1] : %d\n, mask : %d\n", buf[nb_bytes-1], mask);
+      io->reste = buf[nb_bytes-1] & mask;
+      io->nb_reste = reste_in_bits;
+      *p_count = nb_bits;
     }
+    else{
+      
+      //Fill dst with bytes read
+      *dst = io->reste << (bytes_read*8-io->nb_reste);
+      for(uint8_t i=1;i<=bytes_read;i++){
+        *dst |= buf[i] << ((nb_bytes-i-1)*8 + io->nb_reste);
+      }
+
+      *p_count = io->nb_reste + 8*bytes_read;
+      io->reste = 0;
+      io->nb_reste = 0;
+    }
+    free(buf);
   }
 
   return VBS_SUCCESS;
@@ -62,20 +80,21 @@ vorbis_io_t *vorbis_io_init(ogg_logical_stream_t *ogg_desc){
 
   vorbis_io_t *vorbis = malloc(sizeof(vorbis_io_t));
 
-  if(ogg_packet_attach(ogg_desc) != OGG_OK)
-    return VBS_BADSTREAM;
-
   vorbis->stream = ogg_desc;
+  vorbis->reste = 0;
+  vorbis->nb_reste = 0;
 
-  return VBS_SUCCESS;
+  return vorbis;
 }
 
 status_t vorbis_io_next_packet(vorbis_io_t *io){
 
   //Set reste to zero
   io->reste = 0;
+  io->nb_reste = 0;
 
   ogg_status_t ret = ogg_packet_next(io->stream);
+  io->stream = io->stream->next;
 
   if(ret == OGG_OK)
     return VBS_SUCCESS;
@@ -95,8 +114,6 @@ int64_t vorbis_io_limit(vorbis_io_t *io){
 }
 
 void vorbis_io_free(vorbis_io_t *io){
-
-  ogg_packet_detach(io->stream);
 
   free(io);
 }
