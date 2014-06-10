@@ -45,6 +45,16 @@ int init(pcm_handler_t * hdlr, unsigned int sampl,
 	hdlr1->sampl=sampl;
 	//cette fonction doit etre utilisée une seule fois
 	hdlr1->base.init=NULL;
+
+	//bloc de declaration d'un fichier wav
+			
+	affichage_string("RIFF");
+
+
+	//bloc decrivant le format audio
+
+	return (pcm_handler_t *)hdlr1;
+	
 	return 0;
 };
 
@@ -140,16 +150,6 @@ pcm_handler_t *pcm_handler_create(const char *format, const char *arg){
 		}
 		else{
 			hdlr1->base.process=process_wav;
-			FILE *fp=fopen(hdlr1->arg,"w");
-
-			//bloc de declaration d'un fichier wav
-			
-			affichage_string("RIFF");
-
-
-			//bloc decrivant le format audio
-
-			return (pcm_handler_t *)hdlr1;
 		}
 	}
 
