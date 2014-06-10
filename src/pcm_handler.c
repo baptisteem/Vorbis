@@ -6,7 +6,13 @@
 
 #define NB_FORMAT 2
 
-//demander à bap comment on free un pointeur de fonction
+//demander à bap comment on free un pointeur de fonction, le mettre À null il ne 
+//prend pas de place
+//trouver une fonction qui affiche en binaire sans perte à l'avant ou arriere
+//trouver une fonction qui permet de donner la conversion en little endian
+//tenter de regrouper les fonctions raw 
+//tenter d utiliser la fonction affichage list pour verifier le format
+
 typedef struct pcm_handler1 pcm_handler1_t;
 
 
@@ -49,25 +55,20 @@ int16_t swap_int16( int16_t val )
     return ((val & 0xFF) << 8) | (val >> 8);
 }
 
-//Fonction qui permet de convertir un entier en un string 
-//correspondant à sa valeur binaire//fonctionne pas, j ai besoin des 0 inutiles
-//aussi
-char * bin (unsigned long int i)
-{
-    static char buffer [1+sizeof (unsigned long int)*8] = { 0 };
-    char *p=buffer-1+sizeof (unsigned long int)*8;
-    do { *--p = '0' + (i & 1); i >>= 1; } while (i);
-    return p;
+
+void print_little_endian (uint32_t size,uint32_t n){
+	//size peut valoir 16 ou 32 (2 ou 4 octets à afficher)
+	
+	char c[size];
+	for (uint32_t i=0; i<size; i++){
+		c[i]=n % mod 2;
+		c /= 2;
+	}
+
+
 }
 
-//permet d'afficher en binaire little endian un string
-void affichage_string(char *s){
-	printf("%s",bin((unsigned long int)s));
-}
 
-void affichage_entier(uint8_t u){
-	printf("%s",bin(u));
-}
 
 
 int process_raw (pcm_handler_t * hdlr, unsigned int num,int16_t ** samples){
@@ -80,14 +81,6 @@ int process_wav (pcm_handler_t * hdlr, unsigned int num,
 	//printf("entree dans process_wav \n");
 	pcm_handler1_t *hdlr1=(pcm_handler1_t *)hdlr;
 	FILE *fp=fopen(hdlr1->arg,"w");
-
-
-	//bloc de declaration d'un fichier wav
-
-
-
-	//bloc decrivant le format audio
-
 
 	//bloc des données
 	
@@ -102,11 +95,13 @@ int process_wav (pcm_handler_t * hdlr, unsigned int num,
 			//il faut afficher en little endian	
 		}
 	}
+
+	
 	return 0;
 
 }
 
-//La fonction finalize est commune aux deux formats 
+
 int finalize (pcm_handler_t * hdlr) {
 
 	printf("entree finalize \n");
@@ -138,20 +133,24 @@ pcm_handler_t *pcm_handler_create(const char *format, const char *arg){
 		hdlr1->base.init=init;
 		hdlr1->base.finalize=finalize;
 
-		if (format="wav"){
-			hdlr1->base.process=process_wav;
+		if (!strcmp(format,"raw")){
+
+			hdlr1->base.process=process_raw;
+			return (pcm_handler_t *)hdlr1;
 		}
 		else{
-			hdlr1->base.process=process_raw;
+			hdlr1->base.process=process_wav;
+			FILE *fp=fopen(hdlr1->arg,"w");
+
+			//bloc de declaration d'un fichier wav
+			
+			affichage_string("RIFF");
+
+
+			//bloc decrivant le format audio
+
+			return (pcm_handler_t *)hdlr1;
 		}
-		//printing the first parameters
-		
-		FILE *fp=fopen(hdlr1->arg,"w");
-		affichage_string("RIFF");
-
-
-		printf("end handler create \n");
-		return (pcm_handler_t *)hdlr1;
 	}
 
 }
