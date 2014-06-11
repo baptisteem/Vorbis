@@ -62,7 +62,12 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
     floor_t *floor = stream->codec->floors_desc->floors[floor_nb];
   
     ret = floor->decode(stream, floor, data->spectral[i], stream->codec->blocksize[1]/2);
+  
+    if(ret == VBS_UNUSED)
+      data->no_residue[i] = 1;
   }
+
+
   if(ret != VBS_SUCCESS)
     return ret;
 
@@ -117,7 +122,7 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
     sample_t *magnitude_vector = data->residues[map0->magnitude[i]];
     sample_t *angle_vector = data->residues[map0->angle[i]];
   
-    for(uint32_t j=0;j< (sizeof(*magnitude_vector)/sizeof(sample_t));j++){
+    for(uint32_t j=0;j<data->size/2;j++){
       sample_t m = magnitude_vector[j];
       sample_t a = angle_vector[j];
 
