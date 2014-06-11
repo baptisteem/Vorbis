@@ -75,6 +75,11 @@ $(PROG)_dot_product : $(filter-out $(OBJDIR)/dot_product.o,$(OBJECTS)) $(OBJ)/do
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - dot_product ##
 
+## Start - vorbis_io ##
+#vorbis_io : $(PROG)_vorbis_io $(OBJDIR)
+#
+#$(PROG)_vorbis_io : $(filter-out $(OBJDIR)/vorbis_io.o,$(OBJECTS)) $(OBJ)/vorbis_io.o
+#	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 
 ## Start - vorbis_io ##
 vorbis_io : $(PROG)_vorbis_io $(OBJDIR)

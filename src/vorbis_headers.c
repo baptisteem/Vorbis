@@ -32,14 +32,17 @@ status_t vorbis_common_header(vorbis_stream_t *stream, uint8_t *header_type){
     return VBS_BADSTREAM;
   }
 
-  fprintf(stderr,"header type : %d\n", header_type);
+  fprintf(stderr,"header type : %d\n", *header_type);
   fprintf(stderr,"-------------Trace 2------------\n");
 
   for(uint32_t i=0; i<6; i++){
     return_status = vorbis_read_nbits(8, &dst, stream->io_desc, &p_count);
     vorbis[i] = dst;
+    fprintf(stderr,"Lettre : %c\n",dst);
   }
   vorbis[6] = '\0';
+
+  fprintf(stderr,"BIG VORBIS -------------> %s\n", vorbis);
 
   if (return_status==VBS_SUCCESS && p_count==8){
     if (strcmp(vorbis, c) != 0) 
@@ -72,13 +75,13 @@ status_t vorbis_header1_decode(vorbis_stream_t *stream){
   dst = 0;
 
   return_status = vorbis_read_nbits(8, &dst, stream->io_desc, &p_count); // audio_channels
-  if ((return_status==VBS_BADSTREAM))                  // strictement superieur a 0??
+  if (return_status==VBS_BADSTREAM || dst <= 0)                  // strictement superieur a 0??
     return VBS_BADSTREAM;
   stream->codec->audio_channels = (uint8_t)dst;
   dst = 0;
 
   return_status = vorbis_read_nbits(32, &dst, stream->io_desc, &p_count); // audio_sample_rate
-  if ((return_status==VBS_BADSTREAM))                   // strictement superieur a 0?? 
+  if (return_status==VBS_BADSTREAM || dst <= 0)                   // strictement superieur a 0?? 
     return VBS_BADSTREAM;
   stream->codec->audio_sample_rate = dst;  
   dst = 0;
@@ -102,8 +105,9 @@ status_t vorbis_header1_decode(vorbis_stream_t *stream){
   dst = 0;
 
   return_status = vorbis_read_nbits(4, &dst, stream->io_desc, &p_count); // blocksize[0]
+  fprintf(stderr,"Trace 3 - dst : %d, status : %d------------------------\n", dst, return_status);
   dst = pow(2, dst);
-  if ((return_status==VBS_BADSTREAM) || (dst<64) || (dst>8192)) 
+  if (return_status==VBS_BADSTREAM || dst < 64 || dst > 8192) 
     return VBS_BADSTREAM;
   stream->codec->blocksize[0] = (uint16_t)dst;
   dst = 0;
@@ -119,6 +123,8 @@ status_t vorbis_header1_decode(vorbis_stream_t *stream){
   if ((return_status==VBS_BADSTREAM) || (dst!=1)) 
     return VBS_BADSTREAM;  
 
+  fprintf(stderr,"End header 1##############################\n");
+
   return VBS_SUCCESS;
 }
 
@@ -131,6 +137,7 @@ status_t vorbis_header2_decode(vorbis_stream_t *stream){
   fprintf(stderr,"Header 2\n");
   
   return_status = vorbis_common_header(stream, &header_type);
+  fprintf(stderr,"Header type : %d\n", header_type);
   if (header_type != 1 || return_status==VBS_BADSTREAM) 
     return VBS_BADSTREAM; 
 
@@ -197,6 +204,7 @@ status_t vorbis_header2_decode(vorbis_stream_t *stream){
   if ((return_status==VBS_BADSTREAM) || (dst!=1)) 
     return VBS_BADSTREAM;  
   
+  fprintf(stderr,"End header 1##############################\n");
   return VBS_SUCCESS;
 }
 
