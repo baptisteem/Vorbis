@@ -34,10 +34,6 @@ status_t vorbis_read_nbits(uint32_t nb_bits, uint32_t *dst, vorbis_io_t *io, uin
   else{
 
     uint32_t nb_bytes = 0;
-    /*if( (io->nb_reste + nb_bits)/8 %8 == 0)
-      nb_bytes = (io->nb_reste + nb_bits) / 8 + 1;
-    else
-      nb_bytes = (io->nb_reste + nb_bits) / 8;*/
     if( (nb_bits - io->nb_reste) %8 == 0)
       nb_bytes = (nb_bits-io->nb_reste) / 8 ;
     else
@@ -69,6 +65,25 @@ status_t vorbis_read_nbits(uint32_t nb_bits, uint32_t *dst, vorbis_io_t *io, uin
       fprintf(stderr,"Dans nb_bytes = bytes_read\n");
 
       //Fill dst with bytes read
+      //*dst |= io->reste << (nb_bytes*8 + (8-reste_in_bits));
+      uint8_t mask = 0;
+      for(uint8_t k=0;k<io->nb_reste;k++)
+        mask += pow(2,k);
+      *dst |= io->reste & mask;
+      for(int8_t i=0;i<nb_bytes;i++){
+        if(i != nb_bytes-1)
+          *dst |= (buf[i] << (i*8 + io->nb_reste));
+        else{
+          //*dst |= buf[0] << (nb_bytes*8 + (8-io->nb_reste));
+          uint8_t mask = 0;
+          for(uint8_t j=0;j<reste_in_bits;j++)
+            mask += pow(2,j);
+          *dst |= (buf[nb_bytes-1] & mask) << (i*8 + io->nb_reste);
+          // *dst |= buf[nb_bytes-1] & mask;
+        }
+      }
+      /*
+      //Fill dst with bytes read
       *dst = io->reste << (nb_bytes*8 + (8-reste_in_bits));
       for(int8_t i=nb_bytes-1;i>=0;i--){
         if(i != 0)
@@ -82,10 +97,11 @@ status_t vorbis_read_nbits(uint32_t nb_bits, uint32_t *dst, vorbis_io_t *io, uin
           //*dst |= buf[nb_bytes-1] & mask;
         }
       }
-
+      */
       io->reste = 0;
       if(reste_in_bits != 0)
-        io->reste = buf[nb_bytes-1] >> (8-reste_in_bits);
+        //io->reste = buf[nb_bytes-1] >> (8-reste_in_bits);
+        io->reste = buf[0] >> (reste_in_bits);
       io->nb_reste = reste_in_bits;
       *p_count = nb_bits;
     }
