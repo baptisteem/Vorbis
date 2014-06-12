@@ -61,8 +61,10 @@ static status_t mapping_type0_decode_floor(vorbis_stream_t *stream, mapping_type
   
     ret = floor->decode(stream, floor, data->spectral[i], stream->codec->blocksize[1]/2);
   
-    if(ret == VBS_UNUSED)
+    if(ret == VBS_UNUSED){
       data->no_residue[i] = 1;
+      ret = VBS_SUCCESS;
+    }
     else
       data->no_residue[i] = 0;
   }
