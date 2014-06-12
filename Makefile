@@ -38,7 +38,7 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
 						$(OBJDIR)/dot_product.o                                           \
 						$(OBJDIR)/mode.o       
 
-MY_OBJECTS = $(OBJDIR)/main.o	\
+MY_OBJECTS = $(OBJ)/main.o	\
 						$(OBJDIR)/error.o                                                 \
 						$(OBJ)/pcm_handler.o                                           \
 						$(OBJDIR)/ogg_core.o $(OBJDIR)/ogg_packet.o                       \
