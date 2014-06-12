@@ -42,7 +42,7 @@ MY_OBJECTS = $(OBJDIR)/main.o	\
 						$(OBJDIR)/error.o                                                 \
 						$(OBJDIR)/pcm_handler.o                                           \
 						$(OBJDIR)/ogg_core.o $(OBJDIR)/ogg_packet.o                       \
-						$(OBJ)/floor.o $(OBJDIR)/floor0.o $(OBJDIR)/floor1.o           \
+						$(OBJ)/floor.o $(OBJDIR)/floor0.o $(OBJ)/floor1.o           \
 						$(OBJDIR)/vorbis_main.o                                           \
 						$(OBJ)/vorbis_headers.o                                           \
 						$(OBJDIR)/vorbis_packet.o                                         \

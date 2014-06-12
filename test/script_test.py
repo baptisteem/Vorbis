@@ -4,7 +4,7 @@ import shutil
 
 PROG_TEST = "../utils/rms"
 PROG = "./vorbis_decoder"
-MODULES = ["mode","dot_product","floor","mapping","time_transform","helpers","envelope"]
+MODULES = ["mode","dot_product","floor","floor1","mapping","time_transform","helpers","envelope"]
 OGG_EXAMPLES = "ogg_examples/"
 WAV_EXAMPLES = "wav_examples/"
 DIR_GENERATED_SAMPLE = "generated_samples/"
