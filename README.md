@@ -17,9 +17,9 @@
 * Envelope : Erwan
 * Pcm_Handler: Erwan
 * Floor1: Erwan 
+* Residue: JJ
 
 ### Module currently developed ###
 
 * Mapping : Baptiste
 * Codebook: JJ 
-* Residue: JJ
