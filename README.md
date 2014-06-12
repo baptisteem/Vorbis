@@ -18,8 +18,9 @@
 * Pcm_Handler: Erwan
 * Floor1: Erwan 
 * Residue: JJ
+* Mapping : Baptiste
 
 ### Module currently developed ###
 
-* Mapping : Baptiste
-* Codebook: JJ 
+
+* Codebook: JJ
