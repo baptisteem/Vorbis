@@ -16,7 +16,7 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
 						$(OBJDIR)/error.o                                                 \
 						$(OBJDIR)/pcm_handler.o                                           \
 						$(OBJDIR)/ogg_core.o $(OBJDIR)/ogg_packet.o                       \
-						$(OBJDIR)/floor.o $(OBJDIR)/floor0.o $(OBJDIR)/floor1.o           \
+						$(OBJDIR)/floor.o $(OBJDIR)/floor0.o            \
 						$(OBJDIR)/vorbis_main.o                                           \
 						$(OBJDIR)/header1.o                                           \
 						$(OBJDIR)/header2.o                                           \
@@ -24,6 +24,10 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
 						$(OBJDIR)/vorbis_packet.o                                         \
 						$(OBJDIR)/vorbis_io.o                                             \
 						$(OBJDIR)/header3.o                                               \
+						$(OBJDIR)/header1.o                                               \
+						$(OBJDIR)/header2.o                                               \
+						$(OBJDIR)/floor1.o                                               \
+						$(OBJDIR)/common_header.o                                               \
 						$(OBJDIR)/residue.o                                               \
 						$(OBJDIR)/helpers.o                                               \
 						$(OBJDIR)/mapping.o                                               \
@@ -91,6 +95,12 @@ $(PROG)_floor : $(filter-out $(OBJDIR)/floor.o,$(OBJECTS)) $(OBJ)/floor.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - floor ##
 
+## Start - floor1 ##
+floor1 : $(PROG)_floor1 $(OBJDIR)
+
+$(PROG)_floor1 : $(filter-out $(OBJDIR)/floor1.o,$(OBJECTS)) $(OBJ)/floor1.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - floor1 ##
 
 ## Start - helpers ##
 helpers : $(PROG)_helpers $(OBJDIR)
