@@ -40,12 +40,9 @@ MY_OBJECTS = $(OBJDIR)/main.o	\
 						$(OBJDIR)/ogg_core.o $(OBJDIR)/ogg_packet.o                       \
 						$(OBJ)/floor.o $(OBJDIR)/floor0.o $(OBJDIR)/floor1.o           \
 						$(OBJDIR)/vorbis_main.o                                           \
-						$(OBJDIR)/header1.o                                           \
-						$(OBJDIR)/header2.o                                           \
-						$(OBJDIR)/common_header.o                                           \
+						$(OBJ)/vorbis_headers.o                                           \
 						$(OBJDIR)/vorbis_packet.o                                         \
 						$(OBJDIR)/vorbis_io.o                                             \
-						$(OBJDIR)/header3.o                                               \
 						$(OBJDIR)/residue.o                                               \
 						$(OBJ)/helpers.o                                               \
 						$(OBJDIR)/mapping.o                                               \
@@ -90,6 +87,18 @@ floor : $(PROG)_floor $(OBJDIR)
 $(PROG)_floor : $(filter-out $(OBJDIR)/floor.o,$(OBJECTS)) $(OBJ)/floor.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - floor ##
+
+
+
+## Start - headers ##
+headers : $(PROG)_headers $(OBJDIR)
+
+$(OBJ)/vorbis_headers.o: $(SRCDIR)/vorbis_headers.c $(INCDIR)
+	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
+
+$(PROG)_headers : $(filter-out $(OBJDIR)/header1.o $(OBJDIR)/header2.o $(OBJDIR)/header3.o $(OBJDIR)/common_header.o,$(OBJECTS)) $(OBJ)/vorbis_headers.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - headers##
 
 
 ## Start - helpers ##
