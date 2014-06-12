@@ -5,15 +5,8 @@
 
 
 #define NB_FORMAT 2
-
-//demander à bap comment on free un pointeur de fonction, le mettre À null il ne 
-//trouver une fonction qui affiche en binaire sans perte à l'avant ou arriere
-//trouver une fonction qui permet de donner la conversion en little endian
-//tenter de regrouper les fonctions raw 
-//tenter d utiliser la fonction affichage list pour verifier le format
-
+ 
 typedef struct pcm_handler1 pcm_handler1_t;
-
 
 struct pcm_handler1 {
 
@@ -28,7 +21,6 @@ struct pcm_handler1 {
 
 
 void pcm_handler_list(const char *prefix){
-	printf("entree pcm_handler_list \n");
 
 	char * format[NB_FORMAT]={"wav","raw"};
 	
@@ -83,7 +75,10 @@ pcm_handler_t *pcm_handler_create(const char *format, const char *arg){
 
 int init_raw(pcm_handler_t * hdlr, unsigned int sampl,
 		     unsigned int nchan){
-	hdlr->init=NULL;
+	pcm_handler1_t *hdlr1=(pcm_handler1_t *)hdlr;
+	hdlr1->nchan=nchan;
+	hdlr1->base.init=NULL;
+	return 0;
 }
 
 
@@ -97,16 +92,16 @@ int init_wav(pcm_handler_t * hdlr, unsigned int sampl,
  	//seek  
 
 	uint32_t p;
-	p=0x52494646;//"RIFF" en bigendian	
+	p=0x46464952;//"RIFF" en bigendian	
 	fwrite(&p,4,1,hdlr1->fp);
 	p=0;//on reserve juste la place necessaire pour la suite
 	fwrite(&p,4,1,hdlr1->fp);
-	p=0x57415645;//"WAVE" en bigendian
+	p=0x45564157;//"WAVE" en bigendian
 	fwrite(&p,4,1,hdlr1->fp);
 	hdlr1->size +=12;
 
 	//bloc decrivant le format audio
-	p=0x666d7420; //"fmt " en bigendian
+	p=0x20746d66; //"fmt " en bigendian
 	fwrite(&p,4,1,hdlr1->fp);
 	p=16;
 	fwrite(&p,4,1,hdlr1->fp);
@@ -126,7 +121,7 @@ int init_wav(pcm_handler_t * hdlr, unsigned int sampl,
 		
 
 	//bloc donnant les échantillons
-	p=0x64617461; //"data" en bigendian
+	p=0x61746164; //"data" en bigendian
 	fwrite(&p,4,1,hdlr1->fp);
 	p=0; //on reserve juste la place necessaire pour la suite
 	fwrite(&p,4,1,hdlr1->fp);
@@ -177,6 +172,7 @@ int finalize_wav (pcm_handler_t * hdlr) {
 
 	hdlr1->base.process=NULL;
 	fclose(hdlr1->fp);
+	return 0;
 };
 
 
