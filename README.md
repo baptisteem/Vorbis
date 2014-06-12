@@ -15,11 +15,11 @@
 * Header 3 : Baptiste
 * Main : Baptiste
 * Envelope : Erwan
+* Pcm_Handler: Erwan
+* Floor1: Erwan 
 
 ### Module currently developed ###
 
 * Mapping : Baptiste
-* Pcm_Handler: Erwan
-* Floor1: Erwan 
-* Codebook: Erwan et JJ à partir de Mardi après midi
+* Codebook: JJ 
 * Residue: JJ
