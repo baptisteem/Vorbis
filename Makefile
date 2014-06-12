@@ -46,7 +46,7 @@ MY_OBJECTS = $(OBJ)/main.o	\
 						$(OBJ)/vorbis_main.o                                           \
 						$(OBJ)/vorbis_headers.o                                           \
 						$(OBJDIR)/vorbis_packet.o                                         \
-						$(OBJDIR)/vorbis_io.o                                             \
+						$(OBJ)/vorbis_io.o                                             \
 						$(OBJDIR)/residue.o                                               \
 						$(OBJ)/helpers.o                                               \
 						$(OBJ)/mapping.o                                               \
@@ -77,23 +77,11 @@ $(PROG)_dot_product : $(filter-out $(OBJDIR)/dot_product.o,$(OBJECTS)) $(OBJ)/do
 ## End - dot_product ##
 
 ## Start - vorbis_io ##
-#vorbis_io : $(PROG)_vorbis_io $(OBJDIR)
-#
-#$(PROG)_vorbis_io : $(filter-out $(OBJDIR)/vorbis_io.o,$(OBJECTS)) $(OBJ)/vorbis_io.o
-#	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
-
-## Start - vorbis_io ##
 vorbis_io : $(PROG)_vorbis_io $(OBJDIR)
 
-$(PROG)_vorbis_io : $(filter-out $(OBJDIR)/header1.o $(OBJDIR)/header2.o $(OBJDIR)/header3.o $(OBJDIR)/common_header.o $(OBJDIR)/vorbis_io.o,$(OBJECTS)) $(OBJ)/vorbis_io.o $(OBJ)/vorbis_headers.o
+$(PROG)_vorbis_io : $(filter-out $(OBJDIR)/vorbis_io.o,$(OBJECTS)) $(OBJ)/vorbis_io.o	
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
-
-vorbis_headers.o: $(SRCDIR)/vorbis_headers.c $(INCDIR)
-	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
-
-
 ## End - vorbis_io ##
-
 
 ## Start - pcm_handler ##
 pcm_handler : $(PROG)_pcm_handler $(OBJDIR)
