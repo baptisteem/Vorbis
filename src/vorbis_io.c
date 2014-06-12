@@ -71,12 +71,25 @@ status_t vorbis_read_nbits(uint32_t nb_bits, uint32_t *dst, vorbis_io_t *io, uin
       //If we have a multiple of 8 we add the entire last byte
       *dst |= ((buf[nbytes_read-1] & create_mask(8-next_nb_reste)) << (io->nb_reste + (nbytes_read-1)*8));
       
+      *p_count = nb_bits;
       //We update the new reste
       io->nb_reste = next_nb_reste;
       io->reste = buf[nbytes_read-1] >> (8-next_nb_reste) ;
-      *p_count = nb_bits;
     }
     else{
+      
+      //First we add the previous reste
+      *dst = io->reste;
+      //Now we add each bytes 
+      for(uint32_t i=0;i<nbytes_read;i++){
+        *dst |= (buf[i] << (io->nb_reste + i*8));
+      }
+      
+      *p_count = nbytes_read*8 + io->nb_reste;
+      //We update the new reste
+      io->nb_reste = 0;
+      io->reste = 0;
+      
       return VBS_EOP;
     }
     free(buf);
@@ -102,7 +115,6 @@ status_t vorbis_io_next_packet(vorbis_io_t *io){
   io->nb_reste = 0;
 
   ogg_status_t ret = ogg_packet_next(io->stream);
-  //  io->stream = io->stream->next;
 
   if(ret == OGG_OK)
     return VBS_SUCCESS;
