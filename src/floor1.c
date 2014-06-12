@@ -582,13 +582,13 @@ uint32_t render_point(uint32_t x0,uint32_t y0,uint32_t x1,uint32_t y1,uint32_t x
 
 void render_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,uint32_t *tab_indice){
 	int32_t dy=y1-y0;
-	int32_t adx=x1-x0;
+	uint32_t adx=x1-x0;
 	uint32_t ady=abs(dy);
-	int32_t base=dy/adx;
+	int32_t base=dy/(int32_t)adx;
 	uint32_t x=x0;
 	uint32_t y=y0;
-	int32_t err=0;
-	int32_t sy;
+	uint32_t err=0;
+	int32_t sy=0;
 
 	if (dy <0){
 		sy=base-1;
@@ -597,20 +597,17 @@ void render_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,uint32_t *ta
 		sy=base+1;
 	}
 	ady -= adx*abs(base);
-	printf(" premier x %d y %d \n", x ,y);
 	tab_indice[x]=y;
 	
 	for (uint32_t i=x0+1; i<=x1-1;i++){
 		err += ady;
-		if (err >=  adx){
+		if (err >= adx){
 			err -= adx;
 			y +=sy;
 		}
 		else{
 			y += base;
 		}
-		printf(" x %i y %d \n",i,y);
-
 		tab_indice[i]=y;
 	}	
 
