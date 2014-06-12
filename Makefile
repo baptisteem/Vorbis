@@ -15,7 +15,7 @@ LDFLAGS   = -lm
 OBJECTS   = $(OBJDIR)/main.o                                                  \
 						$(OBJDIR)/error.o                                                 \
 						$(OBJDIR)/pcm_handler.o                                           \
-						$(OBJDIR)/ogg_core.o $(OBJDIR)/ogg_packet.o                       \
+						$(OBJDIR)/ogg_core.o                       \
 						$(OBJDIR)/floor.o $(OBJDIR)/floor0.o $(OBJDIR)/floor1.o           \
 						$(OBJDIR)/vorbis_main.o                                           \
 						$(OBJDIR)/header1.o                                           \
@@ -82,6 +82,14 @@ envelope : $(PROG)_envelope $(OBJDIR)
 $(PROG)_envelope : $(filter-out $(OBJDIR)/envelope.o,$(OBJECTS)) $(OBJ)/envelope.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - envelope ##
+
+
+## Start -ogg_packet ##
+ogg_packet : $(PROG)_ogg_packet $(OBJDIR)
+
+$(PROG)_ogg_packet : $(filter-out $(OBJDIR)/ogg_packet.o,$(OBJECTS)) $(OBJ)/ogg_packet.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - ogg_packet ##
 
 
 ## Start - floor ##
