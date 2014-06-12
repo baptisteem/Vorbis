@@ -43,7 +43,7 @@ MY_OBJECTS = $(OBJ)/main.o	\
 						$(OBJ)/pcm_handler.o                                           \
 						$(OBJDIR)/ogg_core.o $(OBJDIR)/ogg_packet.o                       \
 						$(OBJ)/floor.o $(OBJDIR)/floor0.o $(OBJ)/floor1.o           \
-						$(OBJDIR)/vorbis_main.o                                           \
+						$(OBJ)/vorbis_main.o                                           \
 						$(OBJ)/vorbis_headers.o                                           \
 						$(OBJDIR)/vorbis_packet.o                                         \
 						$(OBJDIR)/vorbis_io.o                                             \
@@ -67,6 +67,7 @@ ref : $(PROG)_ref $(OBJDIR)
 $(PROG)_ref : $(OBJECTS)
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - reference ##
+
 
 ## Start - dot_product ##
 dot_product : $(PROG)_dot_product $(OBJDIR)
@@ -159,6 +160,14 @@ main : $(PROG)_main $(OBJDIR)
 $(PROG)_main : $(filter-out $(OBJDIR)/main.o,$(OBJECTS)) $(OBJ)/main.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - mode ##
+
+
+## Start - vorbis_main ##
+vorbis_main : $(PROG)_vorbis_main $(OBJDIR)
+
+$(PROG)_vorbis_main : $(filter-out $(OBJDIR)/vorbis_main.o,$(OBJECTS)) $(OBJ)/vorbis_main.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - vorbis_main ##
 
 
 $(OBJ)/%.o: $(SRCDIR)/%.c $(INCDIR)
