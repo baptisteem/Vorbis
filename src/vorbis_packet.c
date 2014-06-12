@@ -33,6 +33,7 @@ status_t vorbis_packet_decode(vorbis_stream_t *stream, vorbis_packet_t *pkt, uin
   if(tmp != 0)
     return VBS_BADSTREAM;
 
+  //Read mode number
   ret = vorbis_read_nbits(ilog(stream->codec->modes_desc->mode_count-1), &tmp, stream->io_desc, &p_count);
   if(ret != VBS_SUCCESS)
     return ret;
@@ -60,13 +61,13 @@ status_t vorbis_packet_decode(vorbis_stream_t *stream, vorbis_packet_t *pkt, uin
     uint32_t next = tmp;
 
     if(previous == 0){
-      envelope->curr_window = stream->codec->blocksize[1];
-      envelope->prev_window = stream->codec->blocksize[0];    
+        envelope->curr_window = stream->codec->blocksize[1];
+        envelope->prev_window = stream->codec->blocksize[0];    
     }
     if(next == 0){
-      envelope->curr_window = stream->codec->blocksize[1];
-      envelope->next_window = stream->codec->blocksize[0];    
-    }
+        envelope->curr_window = stream->codec->blocksize[1];
+        envelope->next_window = stream->codec->blocksize[0];    
+    } 
   }
 
   //Filter envelop and init
@@ -90,6 +91,11 @@ status_t vorbis_packet_decode(vorbis_stream_t *stream, vorbis_packet_t *pkt, uin
     }
   }
 
+  for(uint32_t i=0;i<pkt_cache->base.nb_chan;i++){
+    for(uint32_t j=0;j<pkt_cache->base.size/2;j++)
+      pkt_cache->base.spectral[i][j] = 0;
+  }
+
   //Mapping decode
   ret = mapping_decode(stream, mode.mapping, (vorbis_packet_t*)pkt_cache);
   if(ret != VBS_SUCCESS)
@@ -109,15 +115,22 @@ status_t vorbis_packet_decode(vorbis_stream_t *stream, vorbis_packet_t *pkt, uin
 
     sample_t *tmp = malloc(pkt_cache->base.size * sizeof(sample_t));
 
-    for(uint32_t k=0;k<pkt_cache->base.size;k++)
-      tmp[k] = 0.0;
+    for(uint32_t j=0;j<pkt_cache->base.size;j++)
+      tmp[j] = 0;
 
     //Overlap add
     *nb_samp = envelope_overlap_add(envelope, pkt_cache->base.temporal[i], pkt_cache->cache[i], tmp);
 
-    //Convert sample_t to int16_t
-    for(uint32_t j=0;j<pkt->size/2;j++){
-      int32_t s = tmp[j] * (pow(2,15)-1);
+    /*
+    for(uint32_t j=0;j<pkt_cache->base.size;j++)
+      fprintf(stderr,"%lf\n", tmp[j]);
+    */
+
+    //Convert sample_t to int16_t    
+    for(uint32_t j=0;j<pkt_cache->base.size;j++){
+      //fprintf(stderr,"%lf\n", tmp[j]);
+      int32_t s = 0;
+      s = tmp[j] * (pow(2,15)-1);
       if(s > INT_16_MAX)
         pkt->pcm[i][j] = INT_16_MAX;
       else if(s < INT_16_MIN)
@@ -129,6 +142,7 @@ status_t vorbis_packet_decode(vorbis_stream_t *stream, vorbis_packet_t *pkt, uin
     free(tmp);
   }
 
+  //Set init to 1 after the first packet
   if(pkt_cache->init == 0){
     pkt_cache->init = 1;
   }
@@ -198,7 +212,7 @@ vorbis_packet_t *vorbis_packet_init(uint16_t *blocksize, uint8_t nb_chan){
   if(packet->base.residues == NULL)
     return NULL;
   // ??????????????????????????
-  /*
+ /* 
   for(uint8_t i=0;i<nb_chan;i++){
     packet->base.residues[i] = malloc( blocksize[1]/2 * sizeof(sample_t));
     if(packet->base.residues[i] == NULL)
