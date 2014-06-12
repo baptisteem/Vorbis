@@ -40,7 +40,7 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
 
 MY_OBJECTS = $(OBJDIR)/main.o	\
 						$(OBJDIR)/error.o                                                 \
-						$(OBJDIR)/pcm_handler.o                                           \
+						$(OBJ)/pcm_handler.o                                           \
 						$(OBJDIR)/ogg_core.o $(OBJDIR)/ogg_packet.o                       \
 						$(OBJ)/floor.o $(OBJDIR)/floor0.o $(OBJ)/floor1.o           \
 						$(OBJDIR)/vorbis_main.o                                           \
@@ -75,6 +75,14 @@ dot_product : $(PROG)_dot_product $(OBJDIR)
 $(PROG)_dot_product : $(filter-out $(OBJDIR)/dot_product.o,$(OBJECTS)) $(OBJ)/dot_product.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - dot_product ##
+
+
+## Start - pcm_handler ##
+pcm_handler : $(PROG)_pcm_handler $(OBJDIR)
+
+$(PROG)_pcm_handler : $(filter-out $(OBJDIR)/pcm_handler.o,$(OBJECTS)) $(OBJ)/pcm_handler.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - pcm_handler ##
 
 
 ## Start - envelope ##
