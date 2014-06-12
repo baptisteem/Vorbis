@@ -66,7 +66,7 @@ $(PROG)_mode : $(filter-out $(OBJDIR)/mode.o,$(OBJECTS)) $(OBJ)/mode.o
 ## Start - mapping ##
 mapping : $(PROG)_mapping $(OBJDIR)
 
-$(PROG)_mapping : $(filter-out $(OBJDIR)/mapping.o,$(OBJECTS)) $(OBJ)/mapping.o
+$(PROG)_mapping : $(filter-out $(OBJDIR)/mapping.o ,$(OBJECTS)) $(OBJ)/mapping.o 
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - mapping ##
 
