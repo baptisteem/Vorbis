@@ -15,11 +15,14 @@
 * Header 3 : Baptiste
 * Main : Baptiste
 * Envelope : Erwan
+* Pcm_Handler: Erwan
+* Floor1: Erwan 
+* Residue: JJ
+* Mapping : Baptiste
 
 ### Module currently developed ###
 
-* Mapping : Baptiste
-* Pcm_Handler: Baptiste
-* Floor1: Erwan --En pause en attente d'info
-* Codebook: Erwan
-* Residue: JJ
+* ogg_packet: Erwan
+* vorbis_io :Bap
+* vorbis_packet: Bap
+* Codebook: JJ
