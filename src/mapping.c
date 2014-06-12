@@ -54,7 +54,7 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
   uint8_t submap_number = 0;
 
   /* Floor */
-  for(uint32_t i=0;i<data->nb_chan;i++){
+  for(uint32_t i=0;i<stream->codec->audio_channels;i++){
   
     submap_number = map0->mux[i];
     uint8_t floor_nb = map0->submap_floor[submap_number];
@@ -65,6 +65,8 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
   
     if(ret == VBS_UNUSED)
       data->no_residue[i] = 1;
+    else
+      data->no_residue[i] = 0;
   }
 
 
@@ -88,7 +90,7 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
   for(uint32_t i=0;i<map0->submap_count;i++){
     uint32_t ch = 0;
 
-    for(uint32_t j=0;j<data->nb_chan;j++){
+    for(uint32_t j=0;j<stream->codec->audio_channels;j++){
       
       if(map0->mux[j] == i){
         
@@ -109,7 +111,7 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
       return ret;
 
     ch = 0;
-    for(uint32_t j=0;j<data->nb_chan;j++){
+    for(uint32_t j=0;j<stream->codec->audio_channels;j++){
       if(map0->mux[j] == i){
         data->residues[j] = data->dec_residues[ch];
         ch++;
