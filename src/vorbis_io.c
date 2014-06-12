@@ -11,128 +11,81 @@ struct vorbis_io{
   uint8_t nb_reste;
 };
 
+/*
+ * Create a mask to get the n first bits
+ */
+static uint8_t create_mask(uint8_t n){
+
+  uint8_t mask = 0;
+  for(uint32_t i=0;i<n;i++)
+    mask += pow(2,i);
+
+  return mask;
+}
+
 status_t vorbis_read_nbits(uint32_t nb_bits, uint32_t *dst, vorbis_io_t *io, uint32_t *p_count){
 
-  //if we have enough bits in reste
-  if(io->nb_reste >= nb_bits){
 
-    uint8_t mask = 0;
-    for(uint8_t i=0;i<nb_bits;i++){
-      mask += pow(2,i);
-    }
-    fprintf(stderr,"Dans retenue = nb_bits, nb_reste : %d\n", io->nb_reste);
-    fprintf(stderr,"Nb_bits : %d\n", nb_bits);
+  //First case, wa have enough bits in reste
+  if(nb_bits <= io->nb_reste){
+    
     *dst = 0;
-    *dst = io->reste & mask;
-    fprintf(stderr,"Avant : Mask : %d, io->reste : %d, dst : %d\n", mask, io->reste, *dst);
-    io->reste = io->reste >> nb_bits;
+    //Select the nb_bits first bits with an and mask
+    *dst = io->reste & create_mask(nb_bits);
+    //Change reste size
     io->nb_reste -= nb_bits;
-
+    //Shift the reste
+    io->reste = io->reste >> nb_bits;
     *p_count = nb_bits;
-    fprintf(stderr,"Apres : Nb_reste : %d, io->reste : %d, dst : %d\n", io->nb_reste, io->reste, *dst);
   }
+  //If we have to ask for new bytes
   else{
-
-    uint32_t nb_bytes = 0;
-    if( (nb_bits - io->nb_reste) %8 == 0)
-      nb_bytes = (nb_bits-io->nb_reste) / 8 ;
-    else
-      nb_bytes = (nb_bits - io->nb_reste) / 8 + 1;
-    uint8_t reste_in_bits = nb_bytes*8 + io->nb_reste - nb_bits;
-    uint8_t *buf = malloc(nb_bytes * sizeof(uint8_t));
-    uint32_t bytes_read = 0;
-
-    ogg_status_t ret = ogg_packet_read(io->stream,buf,nb_bytes,&bytes_read); 
     
-    fprintf(stderr,"############################\n");
-    fprintf(stderr,"Nb_bits : %d, Nb_bytes : %d\n", nb_bits, nb_bytes);
-    fprintf(stderr,"Reste in bits : %d\n", reste_in_bits);
-    for(uint8_t k=0;k<nb_bytes;k++)
-      fprintf(stderr,"Raw data [%d] : %d\n", k,buf[k]);
-    fprintf(stderr,"Nb_reste : %d, reste : %d\n", io->nb_reste, io->reste);
-    fprintf(stderr,"############################\n");
+    //Compute how many bytes we nead to read
+    uint8_t bytes_to_read = (nb_bits - io->nb_reste)/8;
+    //If we don't have a multiple of 8
+    if((nb_bits - io->nb_reste)%8 != 0)
+     bytes_to_read += 1;
+    //Compute how many bits the will be in reste at the end
+    uint8_t next_nb_reste = (io->nb_reste + bytes_to_read*8) - nb_bits;
+
+    uint8_t *buf = malloc(bytes_to_read * sizeof(uint8_t));
+    if(buf == NULL)
+      return VBS_FATAL;
+
+    //Bytes actually read by ogg_packet_read
+    uint32_t nbytes_read = 0;
+    ogg_status_t ret_ogg = ogg_packet_read(io->stream, buf, bytes_to_read, &nbytes_read);
+    if(ret_ogg != OGG_OK)
+      return VBS_FATAL;
     
-
-    if(ret == OGG_END)
-      return VBS_EOP;
-    if(ret != OGG_OK)
-      return VBS_BADSTREAM;
-
-    *dst = 0;
-    //We have the same amount of byte read
-    if(nb_bytes == bytes_read){
-
-      fprintf(stderr,"Dans nb_bytes = bytes_read\n");
-
-      //Fill dst with bytes read
-      //*dst |= io->reste << (nb_bytes*8 + (8-reste_in_bits));
-      uint8_t mask = 0;
-      for(uint8_t k=0;k<io->nb_reste;k++)
-        mask += pow(2,k);
-      *dst |= io->reste & mask;
-      for(int8_t i=0;i<nb_bytes;i++){
-        if(i != nb_bytes-1)
-          *dst |= (buf[i] << (i*8 + io->nb_reste));
-        else{
-          //*dst |= buf[0] << (nb_bytes*8 + (8-io->nb_reste));
-          uint8_t mask = 0;
-          for(uint8_t j=0;j<reste_in_bits;j++)
-            mask += pow(2,j);
-          *dst |= (buf[nb_bytes-1] & mask) << (i*8 + io->nb_reste);
-          // *dst |= buf[nb_bytes-1] & mask;
-        }
+    //If we read the same number of bytes we wanted to
+    if(nbytes_read == bytes_to_read){
+    
+      //First we add the previous reste
+      *dst = io->reste;
+      //Now we add each bytes 
+      for(uint32_t i=0;i<nbytes_read-1;i++){
+        *dst |= (buf[i] << (io->nb_reste + i*8));
       }
-      /*
-      //Fill dst with bytes read
-      *dst = io->reste << (nb_bytes*8 + (8-reste_in_bits));
-      for(int8_t i=nb_bytes-1;i>=0;i--){
-        if(i != 0)
-          *dst |= (buf[i] << (i*8 - reste_in_bits));
-          //*dst |= (buf[nb_bytes-i] << (i*8 - reste_in_bits));
-        else{
-          uint8_t mask = 0;
-          for(uint8_t j=0;j<8-reste_in_bits;j++)
-            mask += pow(2,j);
-          *dst |= buf[0] & mask;
-          //*dst |= buf[nb_bytes-1] & mask;
-        }
-      }
-      */
-      io->reste = 0;
-      if(reste_in_bits != 0)
-        //io->reste = buf[nb_bytes-1] >> (8-reste_in_bits);
-        io->reste = buf[0] >> (reste_in_bits);
-      io->nb_reste = reste_in_bits;
+      //If we have a multiple of 8 we add the entire last byte
+      *dst |= ((buf[nbytes_read-1] & create_mask(8-next_nb_reste)) << (io->nb_reste + (nbytes_read-1)*8));
+      
+      //We update the new reste
+      io->nb_reste = next_nb_reste;
+      io->reste = buf[nbytes_read-1] >> (8-next_nb_reste) ;
       *p_count = nb_bits;
     }
     else{
-
-      fprintf(stderr,"Dans nb_bytes != bytes_read\n");
-      //Fill dst with bytes read
-      *dst = io->reste << (bytes_read*8 + reste_in_bits);
-      for(int8_t i=bytes_read-1;i>=0;i--){
-        if(i != 0)
-          *dst |= (buf[i] << (i*8 - reste_in_bits));
-        else{
-          uint8_t mask = 0;
-          for(uint8_t j=0;j<8-reste_in_bits;j++)
-            mask += pow(2,j);
-          *dst |= buf[0] & mask;
-        }
-      }
-
-      *p_count = io->nb_reste + 8*bytes_read;
-      io->reste = 0;
-      io->nb_reste = 0;
+      return VBS_EOP;
     }
     free(buf);
   }
-
   return VBS_SUCCESS;
 }
 
-vorbis_io_t *vorbis_io_init(ogg_logical_stream_t *ogg_desc){
 
+vorbis_io_t *vorbis_io_init(ogg_logical_stream_t *ogg_desc){
   vorbis_io_t *vorbis = malloc(sizeof(vorbis_io_t));
 
   vorbis->stream = ogg_desc;
