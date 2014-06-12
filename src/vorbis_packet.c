@@ -113,9 +113,9 @@ status_t vorbis_packet_decode(vorbis_stream_t *stream, vorbis_packet_t *pkt, uin
     if(ret != VBS_SUCCESS)
       return ret;
 
-    sample_t *tmp = malloc(pkt_cache->base.size * sizeof(sample_t));
+    sample_t *tmp = malloc(stream->codec->blocksize[1] * sizeof(sample_t));
 
-    for(uint32_t j=0;j<pkt_cache->base.size;j++)
+    for(uint32_t j=0;j<stream->codec->blocksize[1];j++)
       tmp[j] = 0;
 
     //Overlap add
@@ -127,7 +127,7 @@ status_t vorbis_packet_decode(vorbis_stream_t *stream, vorbis_packet_t *pkt, uin
     */
 
     //Convert sample_t to int16_t    
-    for(uint32_t j=0;j<pkt_cache->base.size;j++){
+    for(uint32_t j=0;j<stream->codec->blocksize[1];j++){
       //fprintf(stderr,"%lf\n", tmp[j]);
       int32_t s = 0;
       s = tmp[j] * (pow(2,15)-1);
