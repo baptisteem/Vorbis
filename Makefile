@@ -53,7 +53,7 @@ MY_OBJECTS = $(OBJDIR)/main.o	\
 						$(OBJDIR)/codebook.o                                              \
 						$(OBJDIR)/codebook_read.o                                         \
 						$(OBJDIR)/time_domain_transform.o                                 \
-						$(OBJDIR)/envelope.o                                              \
+						$(OBJ)/envelope.o                                              \
 						$(OBJ)/dot_product.o                                           \
 						$(OBJ)/mode.o       
 
