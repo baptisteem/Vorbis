@@ -45,7 +45,7 @@ MY_OBJECTS = $(OBJDIR)/main.o	\
 						$(OBJDIR)/vorbis_io.o                                             \
 						$(OBJDIR)/residue.o                                               \
 						$(OBJ)/helpers.o                                               \
-						$(OBJDIR)/mapping.o                                               \
+						$(OBJ)/mapping.o                                               \
 						$(OBJDIR)/codebook.o                                              \
 						$(OBJDIR)/codebook_read.o                                         \
 						$(OBJDIR)/time_domain_transform.o                                 \
@@ -120,14 +120,21 @@ $(PROG)_mode : $(filter-out $(OBJDIR)/mode.o,$(OBJECTS)) $(OBJ)/mode.o
 ## Start - time_domain_transform ##
 time_domain : $(PROG)_time_domain $(OBJDIR)
 
+#Rule for time_domain, because not the same name
+$(OBJ)/time_domain_transform.o: $(SRCDIR)/time_domain.c $(INCDIR)
+	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
+
 $(PROG)_time_domain : $(filter-out $(OBJDIR)/time_domain_transform.o,$(OBJECTS)) $(OBJ)/time_domain_transform.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - time_domain_transform ##
 
 
-#Rule for time_domain, because not the same name
-$(OBJ)/time_domain_transform.o: $(SRCDIR)/time_domain.c $(INCDIR)
-	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
+## Start - mapping ##
+mapping : $(PROG)_mapping $(OBJDIR)
+
+$(PROG)_mapping : $(filter-out $(OBJDIR)/mapping.o,$(OBJECTS)) $(OBJ)/mapping.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - mapping ##
 
 $(OBJ)/%.o: $(SRCDIR)/%.c $(INCDIR)
 	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
