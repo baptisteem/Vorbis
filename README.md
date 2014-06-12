@@ -22,5 +22,7 @@
 
 ### Module currently developed ###
 
-
+* ogg_packet: Erwan
+* vorbis_io :Bap
+* vorbis_packet: Bap
 * Codebook: JJ
