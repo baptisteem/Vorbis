@@ -155,7 +155,7 @@ $(PROG)_time_domain : $(filter-out $(OBJDIR)/time_domain_transform.o,$(OBJECTS))
 ## Start - mapping ##
 mapping : $(PROG)_mapping $(OBJDIR)
 
-$(PROG)_mapping : $(filter-out $(OBJDIR)/mapping.o,$(OBJECTS)) $(OBJ)/mapping.o
+$(PROG)_mapping : $(filter-out $(OBJDIR)/mapping.o ,$(OBJECTS)) $(OBJ)/mapping.o 
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - mapping ##
 

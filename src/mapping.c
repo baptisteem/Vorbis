@@ -44,37 +44,42 @@ static void mapping_type0_free(mapping_type0_t *map) {
   free(map);
 }
 
-/*
- * Decode a type0 mapping
+/* 
+ * Decode floor part in type0 decode
  */
-static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vorbis_packet_t *data){
+static status_t mapping_type0_decode_floor(vorbis_stream_t *stream, mapping_type0_t *map, vorbis_packet_t *data){
 
-  status_t ret = VBS_SUCCESS;
-  mapping_type0_t *map0 = (mapping_type0_t *)map;
+  status_t ret;
   uint8_t submap_number = 0;
 
-  /* Floor */
-  for(uint32_t i=0;i<data->nb_chan;i++){
+  for(uint32_t i=0;i<stream->codec->audio_channels;i++){
   
-    submap_number = map0->mux[i];
-    uint8_t floor_nb = map0->submap_floor[submap_number];
+    submap_number = map->mux[i];
+    uint8_t floor_nb = map->submap_floor[submap_number];
 
     floor_t *floor = stream->codec->floors_desc->floors[floor_nb];
   
     ret = floor->decode(stream, floor, data->spectral[i], stream->codec->blocksize[1]/2);
   
-    if(ret == VBS_UNUSED)
+    if(ret == VBS_UNUSED){
       data->no_residue[i] = 1;
+      ret = VBS_SUCCESS;
+    }
+    else
+      data->no_residue[i] = 0;
   }
 
+  return ret;
+}
 
-  if(ret != VBS_SUCCESS)
-    return ret;
+/*
+ * Decode non zero propagate in type0 decode
+ */
+static status_t mapping_type0_decode_non_zero_propagate(mapping_type0_t *map, vorbis_packet_t *data){
 
-  /* Non-zero propagate */
-  for(uint32_t i=0;i<map0->coupling_steps;i++){
-      uint8_t magnitude_channel = map0->magnitude[i];
-      uint8_t angle_channel = map0->angle[i];
+  for(uint32_t i=0;i<map->coupling_steps;i++){
+      uint8_t magnitude_channel = map->magnitude[i];
+      uint8_t angle_channel = map->angle[i];
 
       if(data->no_residue[magnitude_channel] == 0 ||
          data->no_residue[angle_channel] == 0){
@@ -84,13 +89,22 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
       }
   }
 
-  /* Residues */
-  for(uint32_t i=0;i<map0->submap_count;i++){
+  return VBS_SUCCESS;
+}
+
+/*
+ * Decode residues in type0 decode
+ */
+static status_t mapping_type0_decode_residues(vorbis_stream_t *stream, mapping_type0_t *map, vorbis_packet_t *data){
+  
+  status_t ret;
+
+  for(uint32_t i=0;i<map->submap_count;i++){
     uint32_t ch = 0;
 
-    for(uint32_t j=0;j<data->nb_chan;j++){
+    for(uint32_t j=0;j<stream->codec->audio_channels;j++){
       
-      if(map0->mux[j] == i){
+      if(map->mux[j] == i){
         
         if(data->no_residue[j] == 1)
           data->do_not_decode[ch] = 1;
@@ -100,7 +114,7 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
       ch++;
     }
 
-    uint8_t residue_nb = map0->submap_residue[i];
+    uint8_t residue_nb = map->submap_residue[i];
     residue_t *residue = stream->codec->residues_desc->residues[residue_nb];
 
     ret = residue->decode(stream, residue, ch, data->size/2, data->dec_residues, data->do_not_decode);
@@ -109,18 +123,25 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
       return ret;
 
     ch = 0;
-    for(uint32_t j=0;j<data->nb_chan;j++){
-      if(map0->mux[j] == i){
+    for(uint32_t j=0;j<stream->codec->audio_channels;j++){
+      if(map->mux[j] == i){
         data->residues[j] = data->dec_residues[ch];
         ch++;
       }
     }
   }
 
-  /* Inverse coupling */ 
-  for(uint32_t i=0;i<map0->coupling_steps;i++){
-    sample_t *magnitude_vector = data->residues[map0->magnitude[i]];
-    sample_t *angle_vector = data->residues[map0->angle[i]];
+  return VBS_SUCCESS;
+}
+
+/*
+ * Decode inverse coupling in type0 decode
+ */
+static status_t mapping_type0_decode_inverse_coupling(vorbis_stream_t *stream, mapping_type0_t *map, vorbis_packet_t *data){
+  
+  for(uint32_t i=0;i<map->coupling_steps;i++){
+    sample_t *magnitude_vector = data->residues[map->magnitude[i]];
+    sample_t *angle_vector = data->residues[map->angle[i]];
   
     for(uint32_t j=0;j<data->size/2;j++){
       sample_t m = magnitude_vector[j];
@@ -144,6 +165,37 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
       }
     }
   }
+
+  return VBS_SUCCESS;
+}
+
+/*
+ * Decode a type0 mapping
+ */
+static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vorbis_packet_t *data){
+
+  status_t ret;
+  mapping_type0_t *map0 = (mapping_type0_t *)map;
+
+  /* Decode floor part */
+  ret = mapping_type0_decode_floor(stream, map0, data);
+  if(ret != VBS_SUCCESS)
+    return ret;
+
+  /* Non-zero propagate */
+  ret = mapping_type0_decode_non_zero_propagate(map0, data);
+  if(ret != VBS_SUCCESS)
+    return ret;
+
+  /* Residues */
+  ret = mapping_type0_decode_residues(stream, map0, data);
+  if(ret != VBS_SUCCESS)
+    return ret;
+  
+  /* Inverse coupling */ 
+  ret = mapping_type0_decode_inverse_coupling(stream, map0, data);
+  if(ret != VBS_SUCCESS)
+    return ret;
 
   return VBS_SUCCESS;
 }
