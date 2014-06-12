@@ -20,9 +20,9 @@ struct floor_type1_data {
 
 	floor_data_t base;
 	uint32_t size; //Max des floor1_Size_X_List
-	int32_t *floor1_Y;
-	int32_t *floor1_final_Y;
-	int32_t *floor1_final_Y_o;
+	uint32_t *floor1_Y;
+	uint32_t *floor1_final_Y;
+	uint32_t *floor1_final_Y_o;
 	uint32_t *floor1_step2_flag;
 	uint32_t *floor1_step2_flag_o;
 	uint32_t *floor1_X_list_o;
@@ -262,8 +262,8 @@ status_t floor_type1_hdr_decode(vorbis_stream_t *stream, uint8_t id,
 
 uint32_t low_neighbor(uint32_t *v, uint32_t x);
 uint32_t high_neighbor(uint32_t *v, uint32_t x);
-uint8_t render_point(uint32_t x0,int32_t y0,uint32_t x1,int32_t y1,uint32_t xi);
-void render_line(uint32_t x0, int32_t y0, uint32_t x1, int32_t y1,uint32_t *tab_indice);
+uint32_t render_point(uint32_t x0,uint32_t y0,uint32_t x1,uint32_t y1,uint32_t xi);
+void render_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,uint32_t *tab_indice);
 static uint32_t compare_qsort (qsort_struct_t const *a,qsort_struct_t const *b);
 
 
@@ -291,11 +291,11 @@ status_t floor_type1_decode(vorbis_stream_t *stream, floor_t *floor_cfg,
 
 	stat = vorbis_read_nbits(nb_bits, &dst, stream->io_desc, &p_count);
 	if ((stat==VBS_BADSTREAM) || (p_count != nb_bits)) return VBS_BADSTREAM;
-	data1->floor1_Y[0]=(int32_t)dst;
+	data1->floor1_Y[0]=(uint32_t)dst;
 
 	stat = vorbis_read_nbits(nb_bits, &dst, stream->io_desc, &p_count);
 	if ((stat==VBS_BADSTREAM) || (p_count != nb_bits)) return VBS_BADSTREAM;
-	data1->floor1_Y[1]=(int32_t)dst;
+	data1->floor1_Y[1]=(uint32_t)dst;
 
 	uint32_t offset=2;
 	
@@ -315,7 +315,7 @@ status_t floor_type1_decode(vorbis_stream_t *stream, floor_t *floor_cfg,
 			cval=cval >> cbits;
 			if (book >= 0){
 				codebook_translate_scalar(stream,(stream->codec->codebooks_desc->codebooks)[book],&(dst));
-				data1->floor1_Y[j+offset]=dst;
+				data1->floor1_Y[j+offset]=(uint32_t)dst;
 			}
 			else{
 				data1->floor1_Y[j+offset]=0;
@@ -340,13 +340,13 @@ status_t floor_type1_decode(vorbis_stream_t *stream, floor_t *floor_cfg,
 		uint32_t low_neighbor_offset=low_neighbor(floor1->floor1_X_list,i);
 		uint32_t high_neighbor_offset=high_neighbor(floor1->floor1_X_list,i);
 
-		int32_t predicted=render_point(floor1->floor1_X_list[low_neighbor_offset],data1->floor1_final_Y[low_neighbor_offset],floor1->floor1_X_list[high_neighbor_offset],data1->floor1_final_Y[high_neighbor_offset],floor1->floor1_X_list[i]);
+		uint32_t predicted=render_point(floor1->floor1_X_list[low_neighbor_offset],data1->floor1_final_Y[low_neighbor_offset],floor1->floor1_X_list[high_neighbor_offset],data1->floor1_final_Y[high_neighbor_offset],floor1->floor1_X_list[i]);
 
 	
-		int32_t val=data1->floor1_Y[i];
-		int32_t highroom=range - predicted;
-		int32_t lowroom=predicted;
-		int32_t room;
+		uint32_t val=data1->floor1_Y[i];
+		uint32_t highroom=range - predicted;
+		uint32_t lowroom=predicted;
+		uint32_t room;
 
 		if (highroom < lowroom ){
 			room=highroom*2;	
@@ -407,7 +407,7 @@ status_t floor_type1_decode(vorbis_stream_t *stream, floor_t *floor_cfg,
 /*	uint32_t jmin;
 	uint32_t min;
         uint32_t aux;
-	int32_t auxb; 
+	uint32_t auxb; 
 
 	
 	for (uint32_t i=0; i< floor1->floor1_size_X_list; i++){
@@ -502,9 +502,9 @@ status_t floor_type1_data_allocate(floor_data_t *fl_data)
 	
 	floor_type1_data_t *data1=(floor_type1_data_t *) fl_data;
 
-	data1->floor1_Y=calloc(data1->size,sizeof(int32_t));
-	data1->floor1_final_Y=calloc(data1->size,sizeof(int32_t));
-	data1->floor1_final_Y_o=calloc(data1->size,sizeof(int32_t));
+	data1->floor1_Y=calloc(data1->size,sizeof(uint32_t));
+	data1->floor1_final_Y=calloc(data1->size,sizeof(uint32_t));
+	data1->floor1_final_Y_o=calloc(data1->size,sizeof(uint32_t));
 	data1->floor1_step2_flag=calloc(data1->size,sizeof(uint32_t));
 	data1->floor1_step2_flag_o=calloc(data1->size,sizeof(uint32_t));
 	data1->floor1_X_list_o=calloc(data1->size,sizeof(uint32_t));
@@ -534,12 +534,12 @@ uint32_t low_neighbor(uint32_t *v, uint32_t x){
 	int32_t n=-1;
 	for (uint32_t i=0; i<x; i++){
 		if (n==-1){
-			if (v[i]<v[x]){
+			if (v[i]<=v[x]){
 				n=i;
 			}
 		}
 		else{
-			if (v[i]<v[x] && v[n]<v[i]){
+			if (v[i]<=v[x] && v[n]<v[i]){
 				n=i;
 			}	
 		}
@@ -552,12 +552,12 @@ uint32_t high_neighbor(uint32_t *v, uint32_t x){
 	int32_t n=-1;
 	for (uint32_t i=0; i<x; i++){
 		if (n==-1){
-			if (v[i]>v[x]){
+			if (v[i]>=v[x]){
 				n=i;
 			}
 		}
 		else{
-			if (v[i]>v[x] && v[n]>v[i]){
+			if (v[i]>=v[x] && v[n]>v[i]){
 				n=i;
 			}	
 		}
@@ -565,13 +565,13 @@ uint32_t high_neighbor(uint32_t *v, uint32_t x){
 	return n;
 }
 
-uint8_t render_point(uint32_t x0,int32_t y0,uint32_t x1,int32_t y1,uint32_t xi){
+uint32_t render_point(uint32_t x0,uint32_t y0,uint32_t x1,uint32_t y1,uint32_t xi){
 
 	int32_t dy=y1-y0;
-	int32_t adx=x1-x0;
+	uint32_t adx=x1-x0;
 	uint32_t ady=abs(dy);
-	int32_t err=ady*(xi-x0);
-	int32_t off=err/adx;
+	uint32_t err=ady*(xi-x0);
+	uint32_t off=err/adx;
 	if (dy<0){
 		return(y0-off);
 	}
@@ -580,15 +580,15 @@ uint8_t render_point(uint32_t x0,int32_t y0,uint32_t x1,int32_t y1,uint32_t xi){
 	}
 }
 
-void render_line(uint32_t x0, int32_t y0, uint32_t x1, int32_t y1,uint32_t *tab_indice){
+void render_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,uint32_t *tab_indice){
 	int32_t dy=y1-y0;
-	int32_t adx=x1-x0;
+	uint32_t adx=x1-x0;
 	uint32_t ady=abs(dy);
-	int32_t base=dy/adx;
+	int32_t base=dy/(int32_t)adx;
 	uint32_t x=x0;
-	int32_t y=y0;
-	int32_t err=0;
-	int32_t sy;
+	uint32_t y=y0;
+	uint32_t err=0;
+	int32_t sy=0;
 
 	if (dy <0){
 		sy=base-1;
@@ -596,10 +596,10 @@ void render_line(uint32_t x0, int32_t y0, uint32_t x1, int32_t y1,uint32_t *tab_
 	else{
 		sy=base+1;
 	}
-	ady=ady-abs(base)*adx;
+	ady -= adx*abs(base);
 	tab_indice[x]=y;
 	
-	for (uint32_t i=x0+1; i<x1-1;i++){
+	for (uint32_t i=x0+1; i<=x1-1;i++){
 		err += ady;
 		if (err >= adx){
 			err -= adx;
