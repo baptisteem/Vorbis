@@ -89,7 +89,6 @@ int init_wav(pcm_handler_t * hdlr, unsigned int sampl,
 	hdlr1->nchan=nchan;
 	hdlr1->sampl=sampl;
 	hdlr1->base.init=NULL;
- 	//seek  
 
 	uint32_t p;
 	p=0x46464952;//"RIFF" en bigendian	
