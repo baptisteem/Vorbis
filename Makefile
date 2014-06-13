@@ -4,7 +4,7 @@ LD        = gcc
 SRCDIR    = src
 INCDIR    = include
 OBJDIR    = ref_objs
-OBJ				= objs
+OBJ		  = objs
 
 PROG      = vorbis_decoder
 
@@ -59,10 +59,10 @@ MY_OBJECTS = $(OBJ)/main.o	\
 
 quiet-command = $(if $(VERB),$1,$(if $(2),@echo $2 && $1, @$1))
 
-all     : $(OBJDIR) $(PROG)
+all     : $(OBJDIR) $(OBJ) $(PROG)
 
 ## Reference - Seulement les libs de départ ##
-ref : $(PROG)_ref $(OBJDIR)
+ref : $(OBJDIR) $(OBJ) $(PROG)_ref
 
 $(PROG)_ref : $(OBJECTS)
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
@@ -70,7 +70,7 @@ $(PROG)_ref : $(OBJECTS)
 
 
 ## Start - dot_product ##
-dot_product : $(PROG)_dot_product $(OBJDIR)
+dot_product : $(OBJDIR) $(OBJ) $(PROG)_dot_product 
 
 $(PROG)_dot_product : $(filter-out $(OBJDIR)/dot_product.o,$(OBJECTS)) $(OBJ)/dot_product.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
@@ -78,7 +78,7 @@ $(PROG)_dot_product : $(filter-out $(OBJDIR)/dot_product.o,$(OBJECTS)) $(OBJ)/do
 
 
 ## Start - residue ##
-residue : $(PROG)_residue $(OBJDIR)
+residue : $(OBJDIR) $(OBJ) $(PROG)_residue 
 
 $(PROG)_residue : $(filter-out $(OBJDIR)/residue.o,$(OBJECTS)) $(OBJ)/residue.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
@@ -86,14 +86,14 @@ $(PROG)_residue : $(filter-out $(OBJDIR)/residue.o,$(OBJECTS)) $(OBJ)/residue.o
 
 
 ## Start - vorbis_io ##
-vorbis_io : $(PROG)_vorbis_io $(OBJDIR)
+vorbis_io : $(OBJDIR) $(OBJ) $(PROG)_vorbis_io 
 
 $(PROG)_vorbis_io : $(filter-out $(OBJDIR)/vorbis_io.o,$(OBJECTS)) $(OBJ)/vorbis_io.o	
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - vorbis_io ##
 
 ## Start - pcm_handler ##
-pcm_handler : $(PROG)_pcm_handler $(OBJDIR)
+pcm_handler : $(OBJDIR) $(OBJ) $(PROG)_pcm_handler 
 
 $(PROG)_pcm_handler : $(filter-out $(OBJDIR)/pcm_handler.o,$(OBJECTS)) $(OBJ)/pcm_handler.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
@@ -101,7 +101,7 @@ $(PROG)_pcm_handler : $(filter-out $(OBJDIR)/pcm_handler.o,$(OBJECTS)) $(OBJ)/pc
 
 
 ## Start - envelope ##
-envelope : $(PROG)_envelope $(OBJDIR)
+envelope : $(OBJDIR) $(OBJ) $(PROG)_envelope 
 
 $(PROG)_envelope : $(filter-out $(OBJDIR)/envelope.o,$(OBJECTS)) $(OBJ)/envelope.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
@@ -109,14 +109,14 @@ $(PROG)_envelope : $(filter-out $(OBJDIR)/envelope.o,$(OBJECTS)) $(OBJ)/envelope
 
 
 ## Start - floor ##
-floor : $(PROG)_floor $(OBJDIR)
+floor : $(OBJDIR) $(OBJ) $(PROG)_floor
 
 $(PROG)_floor : $(filter-out $(OBJDIR)/floor.o,$(OBJECTS)) $(OBJ)/floor.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - floor ##
 
 ## Start - floor1 ##
-floor1 : $(PROG)_floor1 $(OBJDIR)
+floor1 : $(OBJDIR) $(OBJ) $(PROG)_floor1 
 
 $(PROG)_floor1 : $(filter-out $(OBJDIR)/floor1.o,$(OBJECTS)) $(OBJ)/floor1.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
@@ -124,7 +124,7 @@ $(PROG)_floor1 : $(filter-out $(OBJDIR)/floor1.o,$(OBJECTS)) $(OBJ)/floor1.o
 
 
 ## Start - headers ##
-headers : $(PROG)_headers $(OBJDIR)
+headers : $(OBJDIR) $(OBJ) $(PROG)_headers 
 
 $(OBJ)/vorbis_headers.o: $(SRCDIR)/vorbis_headers.c $(INCDIR)
 	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
@@ -135,14 +135,14 @@ $(PROG)_headers : $(filter-out $(OBJDIR)/header1.o $(OBJDIR)/header2.o $(OBJDIR)
 
 
 ## Start - helpers ##
-helpers : $(PROG)_helpers $(OBJDIR)
+helpers : $(OBJDIR) $(OBJ) $(PROG)_helpers 
 
 $(PROG)_helpers : $(filter-out $(OBJDIR)/helpers.o,$(OBJECTS)) $(OBJ)/helpers.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - helpers ##
 
 ## Start - mode ##
-mode : $(PROG)_mode $(OBJDIR)
+mode : $(OBJDIR) $(OBJ) $(PROG)_mode
 
 $(PROG)_mode : $(filter-out $(OBJDIR)/mode.o,$(OBJECTS)) $(OBJ)/mode.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
@@ -150,7 +150,7 @@ $(PROG)_mode : $(filter-out $(OBJDIR)/mode.o,$(OBJECTS)) $(OBJ)/mode.o
 
 
 ## Start - time_domain_transform ##
-time_domain : $(PROG)_time_domain $(OBJDIR)
+time_domain : $(OBJDIR) $(OBJ) $(PROG)_time_domain 
 
 #Rule for time_domain, because not the same name
 $(OBJ)/time_domain_transform.o: $(SRCDIR)/time_domain.c $(INCDIR)
@@ -162,7 +162,7 @@ $(PROG)_time_domain : $(filter-out $(OBJDIR)/time_domain_transform.o,$(OBJECTS))
 
 
 ## Start - mapping ##
-mapping : $(PROG)_mapping $(OBJDIR)
+mapping : $(OBJDIR) $(OBJ) $(PROG)_mapping
 
 $(PROG)_mapping : $(filter-out $(OBJDIR)/mapping.o ,$(OBJECTS)) $(OBJ)/mapping.o 
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
@@ -170,7 +170,7 @@ $(PROG)_mapping : $(filter-out $(OBJDIR)/mapping.o ,$(OBJECTS)) $(OBJ)/mapping.o
 
 
 ## Start - main ##
-main : $(PROG)_main $(OBJDIR)
+main : $(OBJDIR) $(OBJ) $(PROG)_main 
 
 $(PROG)_main : $(filter-out $(OBJDIR)/main.o,$(OBJECTS)) $(OBJ)/main.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
@@ -178,7 +178,7 @@ $(PROG)_main : $(filter-out $(OBJDIR)/main.o,$(OBJECTS)) $(OBJ)/main.o
 
 
 ## Start - vorbis_main ##
-vorbis_main : $(PROG)_vorbis_main $(OBJDIR)
+vorbis_main : $(OBJDIR) $(OBJ) $(PROG)_vorbis_main 
 
 $(PROG)_vorbis_main : $(filter-out $(OBJDIR)/vorbis_main.o,$(OBJECTS)) $(OBJ)/vorbis_main.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
@@ -193,6 +193,9 @@ $(PROG) : $(MY_OBJECTS)
 
 $(OBJDIR):
 	$(call quiet-command, mkdir -p $(OBJDIR),)
+
+$(OBJ):
+	$(call quiet-command, mkdir -p $(OBJ),)
 
 clean    :
 	$(call quiet-command, rm -f $(OBJ)/* $(PROG)* *~, "  CLEAN    ")1
