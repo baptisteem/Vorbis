@@ -77,6 +77,7 @@ int init_raw(pcm_handler_t * hdlr, unsigned int sampl,
 		     unsigned int nchan){
 	pcm_handler1_t *hdlr1=(pcm_handler1_t *)hdlr;
 	hdlr1->nchan=nchan;
+  hdlr1->sampl=sampl;
 	hdlr1->base.init=NULL;
 	return 0;
 }

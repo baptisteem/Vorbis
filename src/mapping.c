@@ -2,6 +2,9 @@
 #include "helpers.h"
 #include <stdio.h>
 
+
+#define MAPPING_COUNT_BITS 6
+#define MAPPING_TYPE_BITS 16
 #define FLAG_BITS 1
 #define FLAG_SQUARE_BITS 1
 #define MAPPING_SUBMAP_BITS 4
@@ -137,7 +140,7 @@ static status_t mapping_type0_decode_residues(vorbis_stream_t *stream, mapping_t
 /*
  * Decode inverse coupling in type0 decode
  */
-static status_t mapping_type0_decode_inverse_coupling(vorbis_stream_t *stream, mapping_type0_t *map, vorbis_packet_t *data){
+static status_t mapping_type0_decode_inverse_coupling(mapping_type0_t *map, vorbis_packet_t *data){
   
   for(uint32_t i=0;i<map->coupling_steps;i++){
     sample_t *magnitude_vector = data->residues[map->magnitude[i]];
@@ -193,7 +196,7 @@ static status_t mapping_type0_decode(vorbis_stream_t *stream, mapping_t *map, vo
     return ret;
   
   /* Inverse coupling */ 
-  ret = mapping_type0_decode_inverse_coupling(stream, map0, data);
+  ret = mapping_type0_decode_inverse_coupling(map0, data);
   if(ret != VBS_SUCCESS)
     return ret;
 

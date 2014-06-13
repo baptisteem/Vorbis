@@ -63,7 +63,7 @@ def generate_sample(sample, mod):
 def compare_sample(sample,mod):
   temoin = WAV_EXAMPLES + sample + ".wav"
   gen_sample = DIR_GENERATED_SAMPLE + mod + "_" + sample + ".wav"
-  log = open(LOG_FILE, "a+")
+  log = open("rms_"+mod+".log", "a+")
   
   log.write("----- %s -----\n" % sample)
   subprocess.call([PROG_TEST + " " + temoin + " " + gen_sample], shell=True, stdout=log)

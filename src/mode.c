@@ -3,6 +3,13 @@
 #include "helpers.h"
 #include <stdio.h>
 
+#define MODE_COUNT_BITS 6
+#define MODE_FLAG_BITS 1
+#define MODE_WINDOW_BITS 16
+#define MODE_TRANSFORM_BITS 16
+#define MODE_MAPPING_BITS 8
+    
+
 status_t window_modes_setup_init(vorbis_stream_t *stream, window_modes_setup_t **pset){
 
   status_t ret;
