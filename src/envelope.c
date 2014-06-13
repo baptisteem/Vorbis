@@ -13,7 +13,9 @@ envelope_t *envelope_init(uint16_t *blocksize){
 	for (uint32_t i=0; i<2; i++){
 		block[i]=blocksize[i];
 	}
-	
+
+  fprintf(stderr,"Blocksize[0] : %d, [1] : %d\n", blocksize[0], blocksize[1]);
+
 	env->initialized=0;
 	env->blocksize=block;
 	env->prev_window=0;
@@ -44,7 +46,6 @@ status_t envelope_prepare(envelope_t *env, sample_t *filter){
 	uint32_t b0=(env->blocksize)[0];
 
 	if (env->prev_window != env->curr_window){
-
 		i0=(nc-b0)/4;
 		i1=(nc+b0)/4;
 		left_n=b0/2;
@@ -56,7 +57,6 @@ status_t envelope_prepare(envelope_t *env, sample_t *filter){
 	}
 
 	if (env->curr_window != env->next_window){
-
 		i2=(3*nc-b0)/4;
 		i3=(3*nc+b0)/4;
 		right_n=b0/2;
