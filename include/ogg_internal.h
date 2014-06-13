@@ -81,8 +81,14 @@ struct ogg_page_hdr
  */
 struct ogg_packet_handler
 {
-	uint8_t dummy;    /**< Champ inutile, pour respecter la norme C sur
-	                       les structures vides. */
+	uint32_t seg_num;//numero du segment courant
+	uint32_t seg_ind;//indice dans le segment
+	uint32_t data_ind;//indice dans data
+	//uint32_t packet_ind;//numero du byte dans le paquet courant
+	//uint32_t packet_curr_size;
+	//0 si on la connait pas, sinon on peut la mettre à jour
+	//mais la mettre à jour dans un second temps
+
 };
 
 
