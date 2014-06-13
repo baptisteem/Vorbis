@@ -45,7 +45,7 @@ MY_OBJECTS = $(OBJ)/main.o	\
 						$(OBJ)/floor.o $(OBJDIR)/floor0.o $(OBJ)/floor1.o           \
 						$(OBJ)/vorbis_main.o                                           \
 						$(OBJ)/vorbis_headers.o                                           \
-						$(OBJDIR)/vorbis_packet.o                                         \
+						$(OBJ)/vorbis_packet.o                                         \
 						$(OBJ)/vorbis_io.o                                             \
 						$(OBJ)/residue.o                                               \
 						$(OBJ)/helpers.o                                               \
@@ -111,7 +111,7 @@ $(PROG)_envelope : $(filter-out $(OBJDIR)/envelope.o,$(OBJECTS)) $(OBJ)/envelope
 ## Start - vorbis_packet ##
 vorbis_packet : $(PROG)_vorbis_packet $(OBJDIR)
 
-$(PROG)_vorbis_packet : $(filter-out $(OBJDIR)/envelope.o $(OBJDIR)/vorbis_packet.o,$(OBJECTS)) $(OBJ)/envelope.o $(OBJ)/vorbis_packet.o
+$(PROG)_vorbis_packet : $(filter-out $(OBJDIR)/vorbis_packet.o,$(OBJECTS)) $(OBJ)/vorbis_packet.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - vorbis_packet ##
 

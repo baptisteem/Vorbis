@@ -14,8 +14,6 @@ envelope_t *envelope_init(uint16_t *blocksize){
 		block[i]=blocksize[i];
 	}
 
-  fprintf(stderr,"Blocksize[0] : %d, [1] : %d\n", blocksize[0], blocksize[1]);
-
 	env->initialized=0;
 	env->blocksize=block;
 	env->prev_window=0;
