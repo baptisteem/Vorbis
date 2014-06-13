@@ -14,6 +14,7 @@ typedef struct vorbis_pkt_cache vorbis_pkt_cache_t;
 struct vorbis_pkt_cache{
   vorbis_packet_t base;
   sample_t **cache;
+  envelope_t *envelope;
   uint8_t init;
 };
 
@@ -41,13 +42,12 @@ status_t vorbis_packet_decode(vorbis_stream_t *stream, vorbis_packet_t *pkt, uin
   uint8_t mode_number = tmp;
   window_mode_t mode = stream->codec->modes_desc->modes[mode_number];
 
+  //Define window's size
   if(mode.blockflag == 0)
     pkt_cache->base.size = stream->codec->blocksize[0];
   else
     pkt_cache->base.size = stream->codec->blocksize[1];
 
-  //Init envelope
-  envelope_t *envelope = envelope_init(stream->codec->blocksize);
 
   if(mode.blockflag == 1){
     ret = vorbis_read_nbits(1, &tmp, stream->io_desc, &p_count);
@@ -61,20 +61,21 @@ status_t vorbis_packet_decode(vorbis_stream_t *stream, vorbis_packet_t *pkt, uin
     uint32_t next = tmp;
 
     if(previous == 0){
-        envelope->curr_window = stream->codec->blocksize[1];
-        envelope->prev_window = stream->codec->blocksize[0];    
+        pkt_cache->envelope->curr_window = 1;
+        pkt_cache->envelope->prev_window = 0;
     }
     if(next == 0){
-        envelope->curr_window = stream->codec->blocksize[1];
-        envelope->next_window = stream->codec->blocksize[0];    
+        pkt_cache->envelope->curr_window = 1;
+        pkt_cache->envelope->next_window = 0;    
     } 
   }
 
   //Filter envelop and init
   if(pkt_cache->init == 1)
-    envelope->initialized = 1;
+    pkt_cache->envelope->initialized = 1;
+  
   sample_t *filter = malloc(pkt_cache->base.size * sizeof(sample_t));
-  ret = envelope_prepare(envelope, filter);
+  ret = envelope_prepare(pkt_cache->envelope, filter);
   if(ret != VBS_SUCCESS)
     return ret;
 
@@ -119,12 +120,7 @@ status_t vorbis_packet_decode(vorbis_stream_t *stream, vorbis_packet_t *pkt, uin
       tmp[j] = 0;
 
     //Overlap add
-    *nb_samp = envelope_overlap_add(envelope, pkt_cache->base.temporal[i], pkt_cache->cache[i], tmp);
-
-    /*
-    for(uint32_t j=0;j<pkt_cache->base.size;j++)
-      fprintf(stderr,"%lf\n", tmp[j]);
-    */
+    *nb_samp = envelope_overlap_add(pkt_cache->envelope, pkt_cache->base.temporal[i], pkt_cache->cache[i], tmp);
 
     //Convert sample_t to int16_t    
     for(uint32_t j=0;j<stream->codec->blocksize[1];j++){
@@ -147,7 +143,6 @@ status_t vorbis_packet_decode(vorbis_stream_t *stream, vorbis_packet_t *pkt, uin
     pkt_cache->init = 1;
   }
 
-  envelope_free(envelope);
   return VBS_SUCCESS;
 }
 
@@ -162,6 +157,10 @@ vorbis_packet_t *vorbis_packet_init(uint16_t *blocksize, uint8_t nb_chan){
   packet->base.size = blocksize[1];
   packet->init = 0;
 
+  //Init envelope
+  packet->envelope = envelope_init(blocksize);
+  
+  //Init packet cache
   packet->cache = malloc(nb_chan * sizeof(sample_t*));
   if(packet->cache == NULL)
     return NULL;
