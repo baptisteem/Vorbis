@@ -4,12 +4,10 @@ import shutil
 
 PROG_TEST = "../utils/rms"
 PROG = "./vorbis_decoder"
-MODULES = ["residue","mode","main","vorbis_main","vorbis_io","dot_product","pcm_handler","floor","floor1","mapping","time_transform","helpers","envelope"]
+MODULES = ["residue","mode","main","vorbis_main","vorbis_io","headers","dot_product","pcm_handler","floor","floor1","mapping","time_transform","helpers","envelope"]
 OGG_EXAMPLES = "ogg_examples/"
 WAV_EXAMPLES = "wav_examples/"
 DIR_GENERATED_SAMPLE = "generated_samples/"
-LOG_FILE = "test.log"
-
 
 def print_header():
   print("--------------------------------------------")
@@ -63,7 +61,8 @@ def generate_sample(sample, mod):
 def compare_sample(sample,mod):
   temoin = WAV_EXAMPLES + sample + ".wav"
   gen_sample = DIR_GENERATED_SAMPLE + mod + "_" + sample + ".wav"
-  log = open("rms_"+mod+".log", "a+")
+  file_name = "rms_" + mod + ".log"
+  log = open(file_name, "a+")
   
   log.write("----- %s -----\n" % sample)
   subprocess.call([PROG_TEST + " " + temoin + " " + gen_sample], shell=True, stdout=log)
@@ -75,6 +74,12 @@ def compare_sample(sample,mod):
 '''
 def test_module(id_mod):
   generate_prog(MODULES[id_mod-1])
+  
+  file_name = "rms_" + MODULES[id_mod-1] + ".log"
+  #Remove previous log file
+  if os.path.isfile(file_name):
+    os.remove(file_name)
+  
   for sample in os.listdir(OGG_EXAMPLES):
     print("\n---------- %s ------------" % sample)
     generate_sample(sample, MODULES[id_mod-1])
@@ -92,10 +97,6 @@ def test_all_modules():
 ###########################
 
 print_header()
-
-#Remove previous log file
-if os.path.isfile(LOG_FILE):
-  os.remove(LOG_FILE)
 
 shutil.rmtree(DIR_GENERATED_SAMPLE)
 #Test if generated samples dir is created

@@ -47,7 +47,7 @@ MY_OBJECTS = $(OBJ)/main.o	\
 						$(OBJ)/vorbis_headers.o                                           \
 						$(OBJDIR)/vorbis_packet.o                                         \
 						$(OBJ)/vorbis_io.o                                             \
-						$(OBJDIR)/residue.o                                               \
+						$(OBJ)/residue.o                                               \
 						$(OBJ)/helpers.o                                               \
 						$(OBJ)/mapping.o                                               \
 						$(OBJDIR)/codebook.o                                              \

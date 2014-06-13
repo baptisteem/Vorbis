@@ -14,7 +14,7 @@ ogg_status_t decode_ogg_id_stream(long id, ogg_physical_stream_t *ogg_stream, pc
 int main(int argc, char *argv[]) {
 
   FILE *file = NULL;
-  uint32_t c;
+  int32_t c;
   char format[] = "hls:f:o:";
   uint8_t list_stream = 0;
   long id = -1;
