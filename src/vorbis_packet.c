@@ -138,6 +138,10 @@ status_t vorbis_packet_decode(vorbis_stream_t *stream, vorbis_packet_t *pkt, uin
     free(tmp);
   }
 
+
+  pkt_cache->envelope->curr_window = pkt_cache->envelope->next_window;
+  pkt_cache->envelope->prev_window = pkt_cache->envelope->curr_window;
+
   //Set init to 1 after the first packet
   if(pkt_cache->init == 0){
     pkt_cache->init = 1;
