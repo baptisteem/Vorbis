@@ -7,14 +7,32 @@
 
 status_t decode_stream(ogg_logical_stream_t *ogg_stream, pcm_handler_t *pcm_hdler){
 
+  status_t ret;
+
   vorbis_stream_t *vorbis = vorbis_new(ogg_stream,pcm_hdler);
 
-  vorbis_header1_decode(vorbis);
-  vorbis_io_next_packet(vorbis->io_desc);
-  vorbis_header2_decode(vorbis);
-  vorbis_io_next_packet(vorbis->io_desc);
-
-  vorbis_header3_decode(vorbis);
+  //Decode header 1
+  ret = vorbis_header1_decode(vorbis);
+  if(ret != VBS_SUCCESS)
+    return ret;
+  
+  ret = vorbis_io_next_packet(vorbis->io_desc);
+  if(ret != VBS_SUCCESS)
+    return ret;
+  
+  //Decode header 2
+  ret = vorbis_header2_decode(vorbis);
+  if(ret != VBS_SUCCESS)
+    return ret;
+  
+  ret = vorbis_io_next_packet(vorbis->io_desc);
+  if(ret != VBS_SUCCESS)
+    return ret;
+  
+  //Decode header 3
+  ret = vorbis_header3_decode(vorbis);
+  if(ret != VBS_SUCCESS)
+    return ret;
 
   vorbis_packet_t *packet = vorbis_packet_init(vorbis->codec->blocksize,vorbis->codec->audio_channels);
 
@@ -24,7 +42,9 @@ status_t decode_stream(ogg_logical_stream_t *ogg_stream, pcm_handler_t *pcm_hdle
   while(vorbis_io_next_packet(vorbis->io_desc) == VBS_SUCCESS){
     
     uint16_t nb_samp = 0;
-    vorbis_packet_decode(vorbis,packet,&nb_samp);
+    ret = vorbis_packet_decode(vorbis,packet,&nb_samp);
+    if(ret != VBS_SUCCESS)
+      return ret;
     
     //We check if we reached the limit    
     if(vorbis_io_limit(vorbis->io_desc) != -1 && vorbis_io_limit(vorbis->io_desc) < cpt+nb_samp)
