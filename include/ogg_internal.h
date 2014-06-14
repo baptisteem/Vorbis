@@ -85,7 +85,6 @@ struct ogg_packet_handler
 	uint32_t seg_ind;//indice dans le segment
 	uint32_t data_ind;//indice dans data
 	uint32_t packet_ind;//nb de bytes lus dans le paquet
-	int64_t position;//position absolue dans le flux
 };
 
 
