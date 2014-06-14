@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #define END_OF_STREAM 4
+#define BIT_4 0x0004
 
 /*
  * Extend internal_ogg_logical_stream to keep FILE pointer
@@ -12,6 +13,7 @@ typedef struct internal_ogg_logical_stream_file intern_ogg_log_file_t;
 struct internal_ogg_logical_stream_file{
   internal_ogg_logical_stream_t base;
   FILE *file;
+  uint8_t eof;
 };
 
 ogg_status_t ogg_decode_hdr(FILE *file, ogg_page_hdr_t *hdr){
@@ -25,31 +27,24 @@ ogg_status_t ogg_decode_hdr(FILE *file, ogg_page_hdr_t *hdr){
   
   //Version
   fread(&hdr->version,sizeof(uint8_t),1,file);
-  //fprintf(stderr,"Header : version : %d\n", hdr->version);
 
   //Header type flag
   fread(&hdr->type,sizeof(uint8_t),1,file);
-  //fprintf(stderr,"Header : type flag : %d\n", hdr->type);
 
   //Granule pos
   fread(&hdr->gran_pos,sizeof(int64_t),1,file);
-  //fprintf(stderr,"Header : gran_pos : %ld\n", hdr->gran_pos);
 
   //Bitstream serial number
   fread(&hdr->stream_id,sizeof(uint32_t),1,file);
-  //fprintf(stderr,"Header : stream_id : %d\n", hdr->stream_id);
 
   //Page sequence number
   fread(&hdr->page_id,sizeof(uint32_t),1,file);
-  //fprintf(stderr,"Header : page_id : %d\n", hdr->page_id);
 
   //Crc checksum
   fread(&hdr->crc,sizeof(uint32_t),1,file);
-  //fprintf(stderr,"Header : crc : %d\n", hdr->crc);
 
   //Page segment
   fread(&hdr->nb_segs,sizeof(uint8_t),1,file);
-  //fprintf(stderr,"Header : nb_segments : %d\n", hdr->nb_segs);
 
   return OGG_OK;
 }
@@ -65,13 +60,12 @@ ogg_status_t ogg_read_segments(FILE* file, internal_ogg_logical_stream_t *l_stre
   for(uint32_t i=0;i<l_stream->header->nb_segs;i++)
     size_segs += l_stream->table[i];
 
-  //fprintf(stderr,"Nb segs : %d, Size segments : %d\n", l_stream->header->nb_segs,size_segs);
 
   //Init segment data
   l_stream->data = calloc(size_segs,sizeof(uint8_t));
   if(l_stream->data == NULL)
     return OGG_ERR_CORRUPT;
-  
+
   uint32_t cpt = 0;
   for(uint32_t i=0;i<l_stream->header->nb_segs;i++){
     
@@ -94,6 +88,7 @@ ogg_status_t ogg_init(FILE* file, ogg_physical_stream_t **ppstream){
 
   //logical stream with file
   intern_ogg_log_file_t *l_stream = malloc(sizeof(intern_ogg_log_file_t));  
+  l_stream->eof = 0;
 
   //Attach the file to extended internal structure
   l_stream->file = file;
@@ -115,15 +110,12 @@ ogg_status_t ogg_init(FILE* file, ogg_physical_stream_t **ppstream){
   l_stream->base.base.stream_id = l_stream->base.header->stream_id;
   l_stream->base.base.next = NULL;
 
-  fprintf(stderr,"TEST ID : %d\n", l_stream->base.phy->first->stream_id);
-  fprintf(stderr,"In init, size : %d\n", l_stream->base.header->nb_segs);
-
   //Read segment table
   l_stream->base.table = calloc(l_stream->base.header->nb_segs,sizeof(uint8_t));
   if(l_stream->base.table == NULL)
     return OGG_ERR_CORRUPT;
   
-  ogg_read_segments(file, (internal_ogg_logical_stream_t*)l_stream);
+    ogg_read_segments(file, (internal_ogg_logical_stream_t*)l_stream);
   
   return OGG_OK;
 }
@@ -132,12 +124,12 @@ ogg_status_t ogg_term(ogg_physical_stream_t *pstream) {
 
   //Detach packet
   ogg_packet_detach((internal_ogg_logical_stream_t*)pstream->first);
-
+/*
   //Free header, data and table
   free(((internal_ogg_logical_stream_t*)pstream->first)->header);
   free(((internal_ogg_logical_stream_t*)pstream->first)->data);
   free(((internal_ogg_logical_stream_t*)pstream->first)->table);
-
+*/
   //Free extented internal logical stream
   free((intern_ogg_log_file_t*)pstream->first);
 
@@ -154,36 +146,42 @@ ogg_status_t ogg_decode(ogg_logical_stream_t *lstream, pcm_handler_t *pcm_hdler)
     return ogg_ret;
 
   status_t ret = decode_stream(lstream, pcm_hdler);
-  fprintf(stderr,"Return code from decode_stream : %d\n", ret);
   if(ret != VBS_SUCCESS)
     return OGG_ERR_CORRUPT;
-
+  
   return OGG_OK;
 }
 
 ogg_status_t ogg_get_next_page(internal_ogg_logical_stream_t *lstream){
 
-  //fprintf(stderr,"Next page\n");
-
   intern_ogg_log_file_t *stream = (intern_ogg_log_file_t*)lstream;
 
+  if(stream->eof == 1) 
+  {
+    free(lstream->header);
+    lstream->header = NULL;
+    lstream->data = NULL;
+    lstream->table = NULL;
+    return OGG_END;
+  }
+  
   //Free the last data and table
   free(stream->base.data);
   free(stream->base.table);
 
   ogg_status_t ret = ogg_decode_hdr(stream->file, stream->base.header);
-  
+   
+  if((lstream->header->type & BIT_4) == END_OF_STREAM) 
+    stream->eof = 1; 
+
   //Init segment table
   stream->base.table = calloc(stream->base.header->nb_segs,sizeof(uint8_t));
   if(stream->base.table == NULL)
     return OGG_ERR_CORRUPT;
-
+    
   ret = ogg_read_segments(stream->file, lstream);
   if(ret != OGG_OK)
     return ret;
-
-  if(lstream->header->type == END_OF_STREAM)
-    return OGG_END;
   
   return OGG_OK;  
 }
