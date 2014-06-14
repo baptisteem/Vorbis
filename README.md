@@ -9,6 +9,7 @@
 * Common_header : JJ
 * Header 1 : JJ
 * Header 2 : JJ
+* Codebook: JJ
 * Envelope : Erwan
 * Pcm_Handler: Erwan
 * Floor1: Erwan 
@@ -27,4 +28,4 @@
 
 * ogg_packet: Erwan
 * ogg_core : Baptiste
-* Codebook: JJ
+* fast_imdct : JJ
