@@ -156,6 +156,10 @@ ogg_status_t ogg_get_next_page(internal_ogg_logical_stream_t *lstream){
 
   intern_ogg_log_file_t *stream = (intern_ogg_log_file_t*)lstream;
 
+  //Free the last data and table
+  free(stream->base.data);
+  free(stream->base.table);
+  
   if(stream->eof == 1) 
   {
     free(lstream->header);
@@ -165,9 +169,6 @@ ogg_status_t ogg_get_next_page(internal_ogg_logical_stream_t *lstream){
     return OGG_END;
   }
   
-  //Free the last data and table
-  free(stream->base.data);
-  free(stream->base.table);
 
   ogg_status_t ret = ogg_decode_hdr(stream->file, stream->base.header);
    
