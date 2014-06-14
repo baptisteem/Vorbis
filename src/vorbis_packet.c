@@ -4,7 +4,7 @@
 #include "dot_product.h"
 #include "mapping.h"
 #include "mode.h"
-
+ 
 #define PACKET_TYPE_BITS 1
 #define INT_16_MAX 32767
 #define INT_16_MIN -32678

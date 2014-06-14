@@ -10,7 +10,7 @@ status_t vorbis_common_header(vorbis_stream_t *stream, uint8_t *header_type){
   status_t return_status;
   uint32_t p_count, dst; 
   char *c = "vorbis";
-  
+
   return_status = vorbis_read_nbits(1, &dst, stream->io_desc, &p_count);
   
   if ((return_status==VBS_SUCCESS)&&(p_count==1)){
@@ -20,6 +20,7 @@ status_t vorbis_common_header(vorbis_stream_t *stream, uint8_t *header_type){
   }else{
     return VBS_BADSTREAM;
   }
+  
 
   return_status = vorbis_read_nbits(7, &dst, stream->io_desc, &p_count);
   if (return_status==VBS_SUCCESS && p_count==7){
@@ -37,10 +38,11 @@ status_t vorbis_common_header(vorbis_stream_t *stream, uint8_t *header_type){
   if (return_status==VBS_SUCCESS && p_count==8){
     if (strcmp(vorbis, c) != 0) 
       return VBS_BADSTREAM;
-  }else{
+  }
+  else{
     return VBS_BADSTREAM; 
   }
-
+  
   return VBS_SUCCESS;
 }
 
@@ -71,39 +73,39 @@ status_t vorbis_header1_decode(vorbis_stream_t *stream){
     return VBS_BADSTREAM;
   stream->codec->audio_sample_rate = dst;  
   dst = 0;
-
+  
   return_status = vorbis_read_nbits(32, &dst, stream->io_desc, &p_count); // bitrate_maximum
   if (return_status==VBS_BADSTREAM) 
     return VBS_BADSTREAM;
   stream->codec->bitrate_maximum = dst; 
   dst = 0;  
-
+  
   return_status = vorbis_read_nbits(32, &dst, stream->io_desc, &p_count); // bitrate_nominal
   if (return_status==VBS_BADSTREAM) 
     return VBS_BADSTREAM; 
   stream->codec->bitrate_nominal = dst;
   dst = 0;
-
+  
   return_status = vorbis_read_nbits(32, &dst, stream->io_desc, &p_count); // bitrate_minimum
   if (return_status==VBS_BADSTREAM) 
     return VBS_BADSTREAM;
   stream->codec->bitrate_minimum = dst;
   dst = 0;
-
+  
   return_status = vorbis_read_nbits(4, &dst, stream->io_desc, &p_count); // blocksize[0]
   dst = pow(2, dst);
   if (return_status==VBS_BADSTREAM || dst < 64 || dst > 8192) 
     return VBS_BADSTREAM;
   stream->codec->blocksize[0] = (uint16_t)dst;
   dst = 0;
-
+  
   return_status = vorbis_read_nbits(4, &dst_bis, stream->io_desc, &p_count); // blocksize[1]
   dst_bis = pow(2, dst_bis);
   if ((return_status==VBS_BADSTREAM)||(dst>dst_bis)||(dst_bis>8192)) 
     return VBS_BADSTREAM;
   stream->codec->blocksize[1] = (uint16_t)dst_bis;
   dst = 0;
-
+  
   return_status = vorbis_read_nbits(1, &dst, stream->io_desc, &p_count); // framming_flag
   if ((return_status==VBS_BADSTREAM) || (dst!=1)) 
     return VBS_BADSTREAM;  
@@ -192,7 +194,7 @@ status_t vorbis_header3_decode(vorbis_stream_t *stream){
   uint8_t header_type = 0;
   uint32_t p_count = 0; 
   uint32_t dst = 0; 
-
+  
   status_t return_status = VBS_SUCCESS;
   
   return_status = vorbis_common_header(stream, &header_type);

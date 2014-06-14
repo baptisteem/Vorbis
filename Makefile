@@ -41,7 +41,7 @@ OBJECTS   = $(OBJDIR)/main.o                                                  \
 MY_OBJECTS = $(OBJ)/main.o	\
 						$(OBJDIR)/error.o                                                 \
 						$(OBJ)/pcm_handler.o                                           \
-						$(OBJDIR)/ogg_core.o $(OBJDIR)/ogg_packet.o                       \
+						$(OBJ)/ogg_core.o $(OBJDIR)/ogg_packet.o                       \
 						$(OBJ)/floor.o $(OBJDIR)/floor0.o $(OBJ)/floor1.o           \
 						$(OBJ)/vorbis_main.o                                           \
 						$(OBJ)/vorbis_headers.o                                           \
@@ -90,6 +90,14 @@ codebook : $(OBJDIR) $(OBJ) $(PROG)_codebook
 $(PROG)_codebook : $(filter-out $(OBJDIR)/codebook_read.o $(OBJDIR)/codebook.o,$(OBJECTS)) $(OBJ)/codebook.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - codebook ##
+
+
+## Start - ogg_core ##
+ogg_core : $(OBJDIR) $(OBJ) $(PROG)_ogg_core
+
+$(PROG)_ogg_core : $(filter-out $(OBJDIR)/ogg_core.o,$(OBJECTS)) $(OBJ)/ogg_core.o 
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - ogg_core ##
 
 
 ## Start - vorbis_io ##
