@@ -50,8 +50,7 @@ MY_OBJECTS = $(OBJ)/main.o	\
 						$(OBJ)/residue.o                                               \
 						$(OBJ)/helpers.o                                               \
 						$(OBJ)/mapping.o                                               \
-						$(OBJDIR)/codebook.o                                              \
-						$(OBJDIR)/codebook_read.o                                         \
+						$(OBJ)/codebook.o                                              \
 						$(OBJDIR)/time_domain_transform.o                                 \
 						$(OBJ)/envelope.o                                              \
 						$(OBJ)/dot_product.o                                           \
@@ -83,6 +82,14 @@ residue : $(OBJDIR) $(OBJ) $(PROG)_residue
 $(PROG)_residue : $(filter-out $(OBJDIR)/residue.o,$(OBJECTS)) $(OBJ)/residue.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - residue ##
+
+
+## Start - codebook ##
+codebook : $(OBJDIR) $(OBJ) $(PROG)_codebook 
+
+$(PROG)_codebook : $(filter-out $(OBJDIR)/codebook_read.o $(OBJDIR)/codebook.o,$(OBJECTS)) $(OBJ)/codebook.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - codebook ##
 
 
 ## Start - vorbis_io ##
