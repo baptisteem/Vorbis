@@ -21,9 +21,10 @@
 * Vorbis_main : Baptiste
 * Vorbis_io :Baptiste
 * Mapping : Baptiste
+* vorbis_packet: Baptiste
 
 ### Module currently developed ###
 
 * ogg_packet: Erwan
-* vorbis_packet: Bap
+* ogg_core : Baptiste
 * Codebook: JJ
