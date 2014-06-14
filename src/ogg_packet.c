@@ -16,7 +16,7 @@
 //remplacer tous les 255 selon leur sens par les define !!!
 //
 //table et data sont de la meme taille
-#define JUMP 255
+
 
 ogg_status_t ogg_packet_attach(internal_ogg_logical_stream_t *lstream){
 
@@ -25,7 +25,7 @@ ogg_status_t ogg_packet_attach(internal_ogg_logical_stream_t *lstream){
 	hdlr->seg_num=0;
 	hdlr->seg_ind=0;
 	hdlr->data_ind=0;
-	hdlr->packet_ind=1;
+	hdlr->packet_ind=0;
 	
 	lstream->packet=hdlr;
 	return OGG_OK;	
@@ -102,7 +102,7 @@ ogg_status_t ogg_packet_read(ogg_logical_stream_t *lstream,
 	sz=lstream1->table[lstream1->packet->seg_num];
 	sz -=lstream1->packet->seg_ind;
 	//printf("sz %d \n",sz);
-	if (sz <= nbytes){
+	if ( nbytes > sz){
 		
 		//On est placé de manière quelconque sur le segment
 		//On arrive à la fin d'un segment, donc on a lu tout le packet
@@ -149,7 +149,7 @@ ogg_status_t ogg_packet_next(ogg_logical_stream_t *lstream){
 	while(lstream1->table[lstream1->packet->seg_num] == 255){
 		if ((lstream1->packet->seg_num+1) !=(lstream1->header->nb_segs)){
 			//soit il reste des segments derrière
-			lstream1->packet->data_ind +=lstream1->table[lstream1->packet->seg_num];
+			lstream1->packet->data_ind +=lstream1->table[lstream1->packet->seg_num]-lstream1->packet->seg_ind;
 			lstream1->packet->seg_num ++;
 			lstream1->packet->seg_ind=0;		
 		}
@@ -166,6 +166,8 @@ ogg_status_t ogg_packet_next(ogg_logical_stream_t *lstream){
 	if ((lstream1->packet->seg_num+1) !=(lstream1->header->nb_segs)){
 		//Il reste des segments donc des paquets à lire sur cette page
 		printf("reste des segments sur la page \n");
+		lstream1->packet->data_ind +=lstream1->table[lstream1->packet->seg_num];
+		lstream1->packet->data_ind -=lstream1->packet->seg_ind;
 		lstream1->packet->seg_ind=0;
 		lstream1->packet->seg_num ++;
 		lstream1->packet->packet_ind=0;
@@ -200,5 +202,3 @@ ogg_status_t ogg_packet_position(ogg_logical_stream_t *lstream,
 	}
 	return OGG_OK;
 }
-
-
