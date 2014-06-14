@@ -85,6 +85,14 @@ $(PROG)_residue : $(filter-out $(OBJDIR)/residue.o,$(OBJECTS)) $(OBJ)/residue.o
 ## End - residue ##
 
 
+## Start - ogg_core ##
+ogg_core : $(OBJDIR) $(OBJ) $(PROG)_ogg_core
+
+$(PROG)_ogg_core : $(filter-out $(OBJDIR)/ogg_core.o,$(OBJECTS)) $(OBJ)/ogg_core.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - ogg_core ##
+
+
 ## Start - vorbis_io ##
 vorbis_io : $(OBJDIR) $(OBJ) $(PROG)_vorbis_io 
 
