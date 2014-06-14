@@ -23,9 +23,9 @@
 * Vorbis_io :Baptiste
 * Mapping : Baptiste
 * vorbis_packet: Baptiste
+* ogg_core : Baptiste
 
 ### Module currently developed ###
 
 * ogg_packet: Erwan
-* ogg_core : Baptiste
 * fast_imdct : JJ
