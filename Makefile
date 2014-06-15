@@ -139,6 +139,14 @@ $(PROG)_vorbis_packet : $(filter-out $(OBJDIR)/vorbis_packet.o,$(OBJECTS)) $(OBJ
 ## End - vorbis_packet ##
 
 
+## Start -ogg_packet ##
+ogg_packet : $(PROG)_ogg_packet $(OBJDIR)
+
+$(PROG)_ogg_packet : $(filter-out $(OBJDIR)/ogg_packet.o,$(OBJECTS)) $(OBJ)/ogg_packet.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - ogg_packet ##
+
+
 ## Start - floor ##
 floor : $(OBJDIR) $(OBJ) $(PROG)_floor
 

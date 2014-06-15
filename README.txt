@@ -17,6 +17,7 @@ Contact : Si pendant l'execution du programme quelque chose devait
 * Avancement du projet : 
 
   - Tous les modules ont été implémentés, ceux de bases et ceux optionnels.
+  
   - Une implémentation de fast IMDCT a été faites. Celle ci n'est pas aussi 
     rapide que la version fourni. Cela viens, nous le pensons, de l'implémentation
     et non du modèle mathématique. Pour la tester il suffit de faire
@@ -29,6 +30,15 @@ Contact : Si pendant l'execution du programme quelque chose devait
     avec tromboon et tiersen. Nous n'avons pas eu le temps de debuger plus loin. Le 
     problème viens d'une allocation dans ogg_core, mais cela ne pose aucun soucis 
     quand on test ce module avec les objets de références.
+
+  - Le module ogg_packet ne fonctionne pas avec Tiersen. En effet nous avons un header
+    different lors de la comparaison. Cela est du au fait que le fichier fait 32 octets
+    de plus. Si nous enlevons ces octets à la main nous obtenon cette fois un RMS de 0.
+    Il est cependant fonctionnel avec windows, tromboon et mioumiou. Tout cela est
+    détaillé dans ogg_packet.c
+    Le module ogg_packet n'est donc pas dans le Makefile general pour eviter 
+    d'endomager les autres exemples. 
+
 
 ---------------------------------------------------------
 * Organistation du Makefile : 
@@ -58,8 +68,8 @@ Enfin si l'on veut utiliser seulement les modules de références, il suffit de 
 * Utilisation du script de test : 
 
 Un script de test a été crée en python et permet de tester le RMS
-de chaque module pour tous les exemples. Le script se trouve dans le dossier test/
-et s'utilise ainsi
+de chaque module pour tous les exemples. Le script se trouve dans le dossier test/,
+ et il faut donc se dépacer dans celui ci. Le script s'utilise ainsi
 
     $ python script_test.py
 
