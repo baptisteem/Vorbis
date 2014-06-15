@@ -88,6 +88,9 @@ int main(int argc, char *argv[]) {
     }
 
     pcm_handler_delete(pcm_handler);
+    
+    //Close file
+    fclose(file);
 
     ret = ogg_term(physical_stream);
     if(ret != OGG_OK)
