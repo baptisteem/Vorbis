@@ -124,12 +124,7 @@ ogg_status_t ogg_term(ogg_physical_stream_t *pstream) {
 
   //Detach packet
   ogg_packet_detach((internal_ogg_logical_stream_t*)pstream->first);
-/*
-  //Free header, data and table
-  free(((internal_ogg_logical_stream_t*)pstream->first)->header);
-  free(((internal_ogg_logical_stream_t*)pstream->first)->data);
-  free(((internal_ogg_logical_stream_t*)pstream->first)->table);
-*/
+  
   //Free extented internal logical stream
   free((intern_ogg_log_file_t*)pstream->first);
 
