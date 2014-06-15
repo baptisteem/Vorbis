@@ -167,7 +167,6 @@ void residues_free(residues_setup_t * set){
     for(uint32_t j = 0; j<residue_1_temp->residue_classifications; j++){
       free(residue_1_temp->residue_book[j]);
     }
-    
     free(residue_1_temp->residue_book);
     free(residue_1_temp);
   }
@@ -268,7 +267,7 @@ status_t residue_decode(vorbis_stream_t * stream, residue_t * residue, int ch, i
   partition_to_read = (n_to_read/residue_1->residue_partition_size); 
   
   for(int32_t i = 0; i<ch; i++){
-    classification[i] = calloc((partition_to_read), sizeof(uint32_t));
+    classification[i] = calloc((classwords_per_codeword-1+partition_to_read) , sizeof(uint32_t));
   }
   
 

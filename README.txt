@@ -23,6 +23,13 @@ Contact : Si pendant l'execution du programme quelque chose devait
 
     $ make fast 
 
+* Problème connue : 
+
+  - Quand tout les modules sont ensembles nous avons une toute petite fuite mémoire
+    avec tromboon et tiersen. Nous n'avons pas eu le temps de debuger plus loin. Le 
+    problème viens d'une allocation dans ogg_core, mais cela ne pose aucun soucis 
+    quand on test ce module avec les objets de références.
+
 ---------------------------------------------------------
 * Organistation du Makefile : 
 
