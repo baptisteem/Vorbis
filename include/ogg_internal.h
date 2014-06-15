@@ -85,6 +85,7 @@ struct ogg_packet_handler
 	uint32_t seg_ind;//indice dans le segment
 	uint32_t data_ind;//indice dans data
 	uint32_t packet_ind;//nb de bytes lus dans le paquet
+	uint32_t position; //la position selon la def
 	uint32_t end;//boolean=1 si on est à OGG_END
 };
 
