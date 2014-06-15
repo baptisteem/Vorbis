@@ -4,152 +4,212 @@
 #include <inttypes.h>
 
 
-//ce dont je peux avoir besoin dans la struct ogg_packet
-//fonction permettant de se situer au debut du prochain packet
-//
-//attention quand on change de page alors le pcm_handler n est plus le meme bien sur
-//il faut le reallouer juste faire passer l'adresse
-//quand on finit un packet on ne saute pas forcement de page
-//
-//verifier en priorite qu'à chaque etape on a bien toutes les infos
-//
-//remplacer tous les 255 selon leur sens par les define !!!
-//
-//table et data sont de la meme taille
-
-
 ogg_status_t ogg_packet_attach(internal_ogg_logical_stream_t *lstream){
 
-	//printf("attach \n");
 	ogg_packet_handler_t *hdlr=malloc(sizeof(ogg_packet_handler_t));
 	hdlr->seg_num=0;
 	hdlr->seg_ind=0;
 	hdlr->data_ind=0;
-	hdlr->packet_ind=0;
+	hdlr->packet_ind=1;
+	hdlr->end=0;
 	
 	lstream->packet=hdlr;
 	return OGG_OK;	
 }
 
 ogg_status_t ogg_packet_detach(internal_ogg_logical_stream_t *lstream){
-	//printf("detach \n");
 	free(lstream->packet);
 	return OGG_OK;
 }
-
-void printf_handler(internal_ogg_logical_stream_t *lstream1){
-/*
- 	ogg_packet_handler_t *hdlr=lstream1->packet;
-	uint8_t *table=lstream1->table;
-
-	printf(" \n seg_num %d seg_ind %d data_ind %d packet_ind %d \n",hdlr->seg_num,hdlr->seg_ind,hdlr->data_ind,hdlr->packet_ind);
-	printf("taille du segment courant %d nb de segments dans la page %d position", table[hdlr->seg_num],lstream1->header->nb_segs);
-
-*/
-}
-
-
-
-
 
 ogg_status_t ogg_packet_read(ogg_logical_stream_t *lstream, 
                              uint8_t *buf, uint32_t nbytes,
                              uint32_t *nbytes_read){
 
+	//on se situe toujours là ou on va lire
+	
 	internal_ogg_logical_stream_t *lstream1=(internal_ogg_logical_stream_t *)lstream;
-	uint32_t nbr=0;
 	ogg_status_t ret;
-	uint32_t sz=255-lstream1->packet->seg_ind;
-	uint32_t index_packet=0;
+	*nbytes_read=0;
+	uint32_t remind_packet_ind=0;
+	uint32_t rest=0;//nb d'octets possible de lire dans paquet courant
 
-	while ((lstream1->table[lstream1->packet->seg_num] ==255) && (nbytes>=sz) ){
-
-		//on va arriver à la fin d'un segment (sz bytes à parcourir)
-		//car pour le segment courant on peut etre au debut, comme on
-		//peut etre situé au milieu
-		printf("entree dans la boucle qui mange la fin des segments en entier \n");
-		for (uint32_t i=0; i< sz; i++){
-			buf[i+nbr]=lstream1->data[i+lstream1->packet->data_ind];
-		}
-
-		index_packet=lstream1->packet->packet_ind +sz;
-
-		if ((lstream1->packet->seg_num+1) !=(lstream1->header->nb_segs))
-		{
-			//on est dans un segment interne
-			printf("segment interne \n");
-			lstream1->packet->seg_num ++;
-			lstream1->packet->data_ind +=sz;
-		}
-		else{
-			//on est dans le dernier segment d'une page
-			printf("dernier segment \n");
-			ogg_packet_detach(lstream1);
-			ret=ogg_get_next_page(lstream1);
-			if (ret ==OGG_END) return OGG_ERR_UNEXP_EOF;
-			ogg_packet_attach(lstream1);
-
-		}
-
-		nbytes -=sz;
-		nbr +=sz;
-		lstream1->packet->seg_ind=0;
-		lstream1->packet->packet_ind =index_packet;
-		sz=255;//forcement les fois suivantes on sera au debut d'un segment
-	}
-
-	//on est dans le dernier segment du packet
-	sz=lstream1->table[lstream1->packet->seg_num];
-	sz -=lstream1->packet->seg_ind;
-	//printf("sz %d \n",sz);
-	if ( nbytes > sz){
-		
-		//On est placé de manière quelconque sur le segment
-		//On arrive à la fin d'un segment, donc on a lu tout le packet
-		//printf("on va etre à la fin du dernier segment, config avant avancer \n");
-		printf_handler(lstream1);
-		//printf("nbytes %d sz %d \n", nbytes, sz);
-
-		for (uint32_t i=0; i< sz; i++){
-			buf[i+nbr]=lstream1->data[i+lstream1->packet->data_ind];
-		}
-		nbr +=sz;
-		lstream1->packet->seg_ind  +=sz;
-		lstream1->packet->data_ind +=sz;
-		*nbytes_read=nbr;
+	if (lstream1->packet->end == 1){
+		printf("refus debut \n");
 		return OGG_END;
 	}
-	else{
-		//On est placé de manière quelconque sur le segment
-		//On arrive au milieu d'un segment-le packet n est pas fini
-		//printf("on peut lire tous les bytes, config avant avancer ");
-		printf_handler(lstream1);
+
+/* Première partie: depart quelconque dans un premier segment quelconque */
+
+	rest=lstream1->table[lstream1->packet->seg_num];
+	rest -=lstream1->packet->seg_ind;
+
+	if ( nbytes < rest){
+
 		for (uint32_t i=0; i< nbytes; i++){
-			buf[i+nbr]=lstream1->data[i+lstream1->packet->data_ind];
+			buf[i]=lstream1->data[i+lstream1->packet->data_ind];
 		}
-		nbr += nbytes;
-		*nbytes_read=nbr;
 		lstream1->packet->packet_ind +=nbytes;
 		lstream1->packet->data_ind +=nbytes;
 		lstream1->packet->seg_ind +=nbytes;
+		*nbytes_read= nbytes;
 		return OGG_OK;
 
 	}
+	else{
+
+		for (uint32_t i=0; i< rest; i++){
+			buf[i]=lstream1->data[i+lstream1->packet->data_ind];
+		}
+		*nbytes_read +=rest;
+		nbytes -=rest;
+
+		if (lstream1->table[lstream1->packet->seg_num] !=255){
+			//on est à la fin d'un paquet: on se place bien
+			lstream1->packet->seg_ind +=(rest-1);
+			lstream1->packet->data_ind +=(rest-1);
+			lstream1->packet->packet_ind +=(rest-1);
+			lstream1->packet->end =1;
+			return OGG_END;
+		}
+		else{
+			//Nous ne sommes pas à la fin d'un paquet: on continue
+
+			if ((lstream1->packet->seg_num+1) !=(lstream1->header->nb_segs)){
+				//Il y a des segments après
+				lstream1->packet->packet_ind +=rest;
+				lstream1->packet->data_ind += rest;
+				lstream1->packet->seg_ind =0;
+				lstream1->packet->seg_num ++;		
+			}
+			else{	//On doit changer de page
+				lstream1->packet->packet_ind +=rest;
+				lstream1->packet->data_ind += rest;
+				lstream1->packet->seg_ind =0;
+				lstream1->packet->seg_num ++;				
+				remind_packet_ind =lstream1->packet->packet_ind;
+				
+				ret=ogg_get_next_page(lstream1);
+
+
+				if (ret == OGG_END){
+					printf("oggend dans 1ere partie bizarre \n");
+					return OGG_ERR_UNEXP_EOF;
+				}
+				ogg_packet_detach(lstream1);
+				ogg_packet_attach(lstream1);
+				lstream1->packet->packet_ind=remind_packet_ind;
+			}
+		}
+	}
+
+
+	/* Deuxième partie: je suis au debut d'un segment
+	 * je passe des segments jusqu'à avoir celui ou 
+	 * je vais m'arreter de lire (soit le packet se termine, soit le nbytes est
+	 * inferieur ou egale à la taille du packet */
+
+	
+	while ((lstream1->table[lstream1->packet->seg_num]==255) && (nbytes > lstream1->table[lstream1->packet->seg_num])){
+
+		printf("deuxieme partie \n");
+		for (uint32_t i=0; i< 255; i++){
+			buf[i+(*nbytes_read)]=lstream1->data[i+lstream1->packet->data_ind];
+		}
+		*nbytes_read +=255;
+		nbytes -=255;
+
+		if ((lstream1->packet->seg_num+1) !=(lstream1->header->nb_segs)){
+		//Il reste des packets après
+			lstream1->packet->packet_ind +=255;
+			lstream1->packet->data_ind += 255;
+			lstream1->packet->seg_ind =0;
+			lstream1->packet->seg_num ++;	
+
+		}
+		else{
+		//Il faut changer de page
+				lstream1->packet->packet_ind +=rest;
+				lstream1->packet->data_ind += rest;
+				lstream1->packet->seg_ind =0;
+				lstream1->packet->seg_num ++;				
+				remind_packet_ind =lstream1->packet->packet_ind;
+
+
+			ret=ogg_get_next_page(lstream1);
+			if (ret == OGG_END){
+				printf("oggend dans 2eme partie bizarre \n");
+				return OGG_ERR_UNEXP_EOF;
+			}
+			ogg_packet_detach(lstream1);
+			ogg_packet_attach(lstream1);
+			lstream1->packet->packet_ind=remind_packet_ind;
+		}
+	}
+
+	/* Troisième partie:au debut du dernier segment que je vais lire
+	 * en sachant que j ai au moins passé le premier segment */
+	
+
+	if ( nbytes < lstream1->table[lstream1->packet->seg_num])
+	{
+		//Je ne lis pas toute la page
+		for (uint32_t i=0; i< nbytes; i++){
+			buf[i+(*nbytes_read)]=lstream1->data[i+lstream1->packet->data_ind];
+		}
+		lstream1->packet->packet_ind +=nbytes;
+		lstream1->packet->data_ind +=nbytes;
+		lstream1->packet->seg_ind +=nbytes;
+		*nbytes_read += nbytes;
+		return OGG_OK;
+	}
+	else{
+		uint32_t taille=lstream1->table[lstream1->packet->seg_num];
+
+		for (uint32_t i=0; i< taille; i++){
+			buf[i+(*nbytes_read)]=lstream1->data[i+lstream1->packet->data_ind];
+		}
+
+		if (taille != 255){
+			//on se place bien
+			lstream1->packet->seg_ind +=(taille-1);
+			lstream1->packet->data_ind +=(taille-1);
+			lstream1->packet->packet_ind +=(taille-1);
+			lstream1->packet->end =1;
+			*nbytes_read +=taille;
+			return OGG_END;
+		}
+		else{
+		 	//on lit 255; on est pas dans le dernier packet
+			printf("error rien à faire ici \n");
+			return OGG_ERR_UNEXP_EOF;
+		}
+	}
+	
 }
 
-//Necessaire:il faut que data_ind correpondent au debut du paquet 
+
+
+
+
+
+
+
+
 ogg_status_t ogg_packet_next(ogg_logical_stream_t *lstream){
 
 	internal_ogg_logical_stream_t *lstream1=(internal_ogg_logical_stream_t *)lstream;
 
 	ogg_status_t ret;
-//	printf("ogg_packet_next \n");
 
 	//On avance jusqu'àu dernier segment du packet
 	while(lstream1->table[lstream1->packet->seg_num] == 255){
 		if ((lstream1->packet->seg_num+1) !=(lstream1->header->nb_segs)){
 			//soit il reste des segments derrière
-			lstream1->packet->data_ind +=lstream1->table[lstream1->packet->seg_num]-lstream1->packet->seg_ind;
+			lstream1->packet->data_ind +=lstream1->table[lstream1->packet->seg_num];
+			lstream1->packet->data_ind -=lstream1->packet->seg_ind;
+			lstream1->packet->packet_ind +=lstream1->table[lstream1->packet->seg_num];
+			lstream1->packet->packet_ind -=lstream1->packet->seg_ind;
 			lstream1->packet->seg_num ++;
 			lstream1->packet->seg_ind=0;		
 		}
@@ -157,7 +217,11 @@ ogg_status_t ogg_packet_next(ogg_logical_stream_t *lstream){
 			//soit on doit changer de page
 			ogg_packet_detach(lstream1);
 			ret=ogg_get_next_page(lstream1);
-			if (ret ==OGG_END) return OGG_ERR_UNEXP_EOF;
+			if (ret ==OGG_END){
+
+			       	printf("fin fichier bizarre dans next packet \n");
+				return OGG_ERR_UNEXP_EOF;
+			}
 			ogg_packet_attach(lstream1);
 		}
 	}
@@ -165,23 +229,35 @@ ogg_status_t ogg_packet_next(ogg_logical_stream_t *lstream){
 	//On est sur le dernier segment d'un paquet
 	if ((lstream1->packet->seg_num+1) !=(lstream1->header->nb_segs)){
 		//Il reste des segments donc des paquets à lire sur cette page
-		printf("reste des segments sur la page \n");
 		lstream1->packet->data_ind +=lstream1->table[lstream1->packet->seg_num];
 		lstream1->packet->data_ind -=lstream1->packet->seg_ind;
 		lstream1->packet->seg_ind=0;
 		lstream1->packet->seg_num ++;
-		lstream1->packet->packet_ind=0;
+		lstream1->packet->packet_ind=1;
+		lstream1->packet->end=0;
+		return OGG_OK;
 	}
 	else{
 		//le packet est le dernier de la page et se finit sur cette page
-//		printf("dernier segment de la page \n");
+		lstream1->packet->packet_ind +=lstream1->table[lstream1->packet->seg_num];
+		lstream1->packet->packet_ind -=lstream1->packet->seg_ind;
 		ogg_packet_detach(lstream1);
 		ret=ogg_get_next_page(lstream1);
+		if (ret ==OGG_END) 
+		{
+			ogg_packet_attach(lstream1);
+			printf("oggend dans next packet");
+			return OGG_END;
+		}
 		ogg_packet_attach(lstream1);
-		if (ret ==OGG_END) return OGG_END;//on est alors à la fin
+		return OGG_OK;
 	}
-	return OGG_OK;
 }
+
+
+
+
+
 
 uint32_t ogg_packet_size(ogg_logical_stream_t *lstream){
 	
