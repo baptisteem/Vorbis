@@ -46,7 +46,7 @@ def generate_prog(mod):
   subprocess.call(["make " + mod + " -C ../"], shell=True)
 
 '''
-  Decompresse un son .ogg en .wav
+  Convertie un son .ogg en .wav
 '''
 def generate_sample(sample, mod):
   gen_sample = DIR_GENERATED_SAMPLE + mod + "_" + sample + ".wav"
@@ -64,9 +64,11 @@ def compare_sample(sample,mod):
   file_name = "rms_" + mod + ".log"
   log = open(file_name, "a+")
   
-  log.write("----- %s -----\n" % sample)
+  log.write("Results for %s\n" % sample)
+  log.write("---------------------------\n")
+  log.flush();
   subprocess.call([PROG_TEST + " " + temoin + " " + gen_sample], shell=True, stdout=log)
-  log.write("\n")
+  log.write("\n\n\n")
   log.close()
 
 '''
@@ -80,17 +82,44 @@ def test_module(id_mod):
   if os.path.isfile(file_name):
     os.remove(file_name)
   
+  #Header for rms test
+  log = open(file_name, "a+")
+  log.write("#######################################\n")
+  log.write("#    Rms for module %s\n" % MODULES[id_mod-1])
+  log.write("#######################################\n\n")
+  log.close();
+
   for sample in os.listdir(OGG_EXAMPLES):
-    print("\n---------- %s ------------" % sample)
+    print("\nTesting for %s" % sample)
+    print("---------------------------")
     generate_sample(sample, MODULES[id_mod-1])
     compare_sample(sample, MODULES[id_mod-1])
+    print("\n\n")
 
 ''' 
   Permet de tester tout les modules
 '''
-def test_all_modules():
-  for id_mod in xrange(len(MODULES)):
-    test_module(id_mod+1)
+def test_all():
+  generate_prog("")
+  
+  file_name = "rms_all.log"
+  #Remove previous log file
+  if os.path.isfile(file_name):
+    os.remove(file_name)
+  
+  #Header for rms test
+  log = open(file_name, "a+")
+  log.write("#######################################\n")
+  log.write("#    Rms for module all modules\n")
+  log.write("#######################################\n\n")
+  log.close();
+
+  for sample in os.listdir(OGG_EXAMPLES):
+    print("\nTesting for %s" % sample)
+    print("---------------------------")
+    generate_sample(sample, "all")
+    compare_sample(sample, "all")
+    print("\n\n")
 
 ###########################
 #          MAIN           #
@@ -107,7 +136,7 @@ if not os.path.exists(DIR_GENERATED_SAMPLE):
 res = int(display_menu())
 
 if res == 0:
-  test_all_modules()
+  test_all()
 elif res in xrange(len(MODULES)+1):
   test_module(res)
 else:

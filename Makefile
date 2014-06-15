@@ -47,7 +47,7 @@ MY_OBJECTS = $(OBJ)/main.o	\
 						$(OBJ)/vorbis_headers.o                                           \
 						$(OBJ)/vorbis_packet.o                                         \
 						$(OBJ)/vorbis_io.o                                             \
-						$(OBJ)/residue.o                                               \
+						$(OBJDIR)/residue.o                                               \
 						$(OBJ)/helpers.o                                               \
 						$(OBJ)/mapping.o                                               \
 						$(OBJ)/codebook.o                                              \
@@ -58,7 +58,7 @@ MY_OBJECTS = $(OBJ)/main.o	\
 
 quiet-command = $(if $(VERB),$1,$(if $(2),@echo $2 && $1, @$1))
 
-all     : $(OBJDIR) $(OBJ) $(PROG)
+all     : $(OBJDIR) $(OBJ) $(PROG)_all
 
 ## Reference - Seulement les libs de départ ##
 ref : $(OBJDIR) $(OBJ) $(PROG)_ref
@@ -80,6 +80,14 @@ $(PROG)_dot_product : $(filter-out $(OBJDIR)/dot_product.o,$(OBJECTS)) $(OBJ)/do
 residue : $(OBJDIR) $(OBJ) $(PROG)_residue 
 
 $(PROG)_residue : $(filter-out $(OBJDIR)/residue.o,$(OBJECTS)) $(OBJ)/residue.o
+	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
+## End - residue ##
+
+
+## Start - fast ##
+fast : $(OBJDIR) $(OBJ) $(PROG)_fast
+
+$(PROG)_fast : $(filter-out $(OBJDIR)/time_domain_transform.o,$(OBJECTS)) $(OBJ)/time_domain_fast.o $(OBJ)/fast_imdc.o
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 ## End - residue ##
 
@@ -211,7 +219,7 @@ $(PROG)_vorbis_main : $(filter-out $(OBJDIR)/vorbis_main.o,$(OBJECTS)) $(OBJ)/vo
 $(OBJ)/%.o: $(SRCDIR)/%.c $(INCDIR)
 	$(LD) $(CFLAGS) $(LDFLAGS) -c $< -o $@ 
 
-$(PROG) : $(MY_OBJECTS)
+$(PROG)_all : $(MY_OBJECTS)
 	$(call quiet-command, $(LD) $^ $(LDFLAGS) -o $@, "  LD       $@" $(LDFLAGS))
 
 $(OBJDIR):
