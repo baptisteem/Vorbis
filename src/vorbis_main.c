@@ -39,23 +39,25 @@ status_t decode_stream(ogg_logical_stream_t *ogg_stream, pcm_handler_t *pcm_hdle
   pcm_hdler->init(pcm_hdler,vorbis->codec->audio_sample_rate,vorbis->codec->audio_channels);
 
   int64_t cpt = 0;
+  int64_t limit = 0;
   while(vorbis_io_next_packet(vorbis->io_desc) == VBS_SUCCESS){
     
     uint16_t nb_samp = 0;
     ret = vorbis_packet_decode(vorbis,packet,&nb_samp);
     if(ret != VBS_SUCCESS)
       return ret;
-    
+
+    limit = vorbis_io_limit(vorbis->io_desc);
     //We check if we reached the limit    
-    if(vorbis_io_limit(vorbis->io_desc) != -1 && vorbis_io_limit(vorbis->io_desc) < cpt+nb_samp)
+    if(limit != -1 && limit < cpt+nb_samp)
       break;
     
     cpt += nb_samp;
+      
     pcm_hdler->process(pcm_hdler,nb_samp,packet->pcm);
   }
 
-
-  pcm_hdler->process(pcm_hdler,vorbis_io_limit(vorbis->io_desc)-cpt,packet->pcm);
+  pcm_hdler->process(pcm_hdler,limit-cpt,packet->pcm);
   pcm_hdler->finalize(pcm_hdler);
   vorbis_packet_free(packet);
   vorbis_free(vorbis);
