@@ -19,7 +19,9 @@ Contact : Si pendant l'execution du programme quelque chose devait
   - Tous les modules ont été implémentés, ceux de bases et ceux optionnels.
   - Une implémentation de fast IMDCT a été faites. Celle ci n'est pas aussi 
     rapide que la version fourni. Cela viens, nous le pensons, de l'implémentation
-    et non du modèle mathématique. 
+    et non du modèle mathématique. Pour la tester il suffit de faire
+
+    $ make fast 
 
 ---------------------------------------------------------
 * Organistation du Makefile : 
