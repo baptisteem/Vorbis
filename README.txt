@@ -38,7 +38,7 @@ Pour utiliser tout les modules que nous avons implémentés il suffit de faire
 
     $ make
  
-Un programme vorbis_decoder_all sera alors crée. 
+Un programme vorbis_decoder_all sera alors crée. Pour des soucis de vitesse, nous avons enlevé notre time_domain_transform dans la compilation totale. Il peut évident y être ajouté, et peut aussi être testé grâce au script de test.
 
 Enfin si l'on veut utiliser seulement les modules de références, il suffit de faire
 
